@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { BASE_API_URL } from "~/data/shared";
 
 const updateOrderStatusSchema = z.object({
   orderId: z.number().int(),
@@ -21,7 +22,7 @@ export default function UpdateOrderStatusForm() {
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const onSubmit = async (data: any) => {
-    const response = await fetch(`${process.env.LIFEFILE_API_BASE}/update-order-status`, {
+    const response = await fetch(`${BASE_API_URL}/update-order-status`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
