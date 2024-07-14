@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply overflow-x-hidden min-h-[100svh] text-neutral-950 dark:text-neutral-200 dark:bg-neutral-900;
+  }
+  html.light,
+  :root[class~="light"] {
+    @apply bg-lightBg;
+  }
+  html.dark,
+  :root[class~="dark"] {
+  }
+  html.light body[data-scroll-locked],
+  html.dark body[data-scroll-locked] {
+    margin-right: 0!important;
+  }
+  code {
+    @apply relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+  }
+  p {
+    @apply leading-7 [&:not(:first-child)]:mt-6;
+  }
+
+  form label input,
+  form label button {
+    @apply mt-1;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .spinning {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@layer utility {
+  /*FOR DEV*/
+  .callout {
+    @apply bg-yellow-400 bg-opacity-10 outline-dashed outline-4 outline-orange-500 outline-offset-[-2px];
+  }
+}
