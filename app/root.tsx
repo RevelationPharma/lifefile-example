@@ -6,6 +6,7 @@ import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderD
 import { clsx } from "clsx";
 import { useEffect } from "react";
 import { PreventFlashOnWrongTheme, ThemeProvider, useTheme } from "remix-themes";
+import { Header } from "~/components/header";
 import { Toaster } from "~/components/ui/toaster";
 import { themeSessionResolver } from "~/services/session.server";
 import mainCss from "~/styles/main.css";
@@ -86,6 +87,7 @@ export function App() {
         <Links />
       </head>
       <body>
+        <Header />
         <Outlet />
         <Toaster />
         <ScrollRestoration />

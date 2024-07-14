@@ -2,6 +2,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
+import { Input } from "~/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Textarea } from "~/components/ui/textarea";
 
 const orderSchema = z.object({
   referenceId: z.string().max(200),
@@ -12,11 +17,6 @@ const orderSchema = z.object({
   firstName: z.string().max(30),
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   gender: z.enum(["m", "f", "a", "u"]),
-  address1: z.string().max(60),
-  city: z.string().max(30),
-  state: z.string().max(2),
-  zip: z.string().max(10),
-  country: z.string().max(2),
   drugName: z.string().max(254),
   quantity: z.string().max(45),
   directions: z.string().max(65535).optional(),
@@ -27,6 +27,7 @@ export default function OrderForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(orderSchema),
@@ -34,7 +35,7 @@ export default function OrderForm() {
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const onSubmit = (data: any) => {
-    fetch("/post-order", {
+    fetch("/api/post-order", {
       method: "post",
       body: JSON.stringify(data),
       headers: {
@@ -44,84 +45,122 @@ export default function OrderForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <input type="text" {...register("referenceId")} placeholder="Reference ID" />
+        <label htmlFor="referenceId" className="block text-sm font-medium text-gray-700">
+          Message ID:
+        </label>
+        <Input type="text" id="referenceId" {...register("referenceId")} placeholder="Reference ID" />
         {errors.referenceId && typeof errors.referenceId.message === "string" && (
-          <span>{errors.referenceId.message}</span>
+          <span className="text-red-600">{errors.referenceId.message}</span>
         )}
       </div>
       <div>
-        <input type="text" {...register("memo")} placeholder="Memo" />
-        {errors.memo && typeof errors.memo.message === "string" && <span>{errors.memo.message}</span>}
+        <label htmlFor="memo" className="block text-sm font-medium text-gray-700">
+          Memo:
+        </label>
+        <Input type="text" id="memo" {...register("memo")} placeholder="Memo" />
+        {errors.memo && typeof errors.memo.message === "string" && (
+          <span className="text-red-600">{errors.memo.message}</span>
+        )}
       </div>
       <div>
-        <input type="text" {...register("npi")} placeholder="NPI" />
-        {errors.npi && typeof errors.npi.message === "string" && <span>{errors.npi.message}</span>}
+        <label htmlFor="npi" className="block text-sm font-medium text-gray-700">
+          NPI:
+        </label>
+        <Input type="text" id="npi" {...register("npi")} placeholder="NPI" />
+        {errors.npi && typeof errors.npi.message === "string" && (
+          <span className="text-red-600">{errors.npi.message}</span>
+        )}
       </div>
       <div>
-        <input type="text" {...register("licenseState")} placeholder="License State" />
+        <label htmlFor="licenseState" className="block text-sm font-medium text-gray-700">
+          License State:
+        </label>
+        <Input type="text" id="licenseState" {...register("licenseState")} placeholder="License State" />
         {errors.licenseState && typeof errors.licenseState.message === "string" && (
-          <span>{errors.licenseState.message}</span>
+          <span className="text-red-600">{errors.licenseState.message}</span>
         )}
       </div>
       <div>
-        <input type="text" {...register("lastName")} placeholder="Last Name" />
-        {errors.lastName && typeof errors.lastName.message === "string" && <span>{errors.lastName.message}</span>}
+        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+          Last Name:
+        </label>
+        <Input type="text" id="lastName" {...register("lastName")} placeholder="Last Name" />
+        {errors.lastName && typeof errors.lastName.message === "string" && (
+          <span className="text-red-600">{errors.lastName.message}</span>
+        )}
       </div>
       <div>
-        <input type="text" {...register("firstName")} placeholder="First Name" />
-        {errors.firstName && typeof errors.firstName.message === "string" && <span>{errors.firstName.message}</span>}
+        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+          First Name:
+        </label>
+        <Input type="text" id="firstName" {...register("firstName")} placeholder="First Name" />
+        {errors.firstName && typeof errors.firstName.message === "string" && (
+          <span className="text-red-600">{errors.firstName.message}</span>
+        )}
       </div>
       <div>
-        <input type="date" {...register("dateOfBirth")} />
+        <label className="block text-sm font-medium text-gray-700">Date of Birth:</label>
+        <DatePicker
+          onDateChange={(date) => {
+            if (date) {
+              setValue("dateOfBirth", date.toISOString().split("T")[0]);
+            }
+          }}
+        />
         {errors.dateOfBirth && typeof errors.dateOfBirth.message === "string" && (
-          <span>{errors.dateOfBirth.message}</span>
+          <span className="text-red-600">{errors.dateOfBirth.message}</span>
         )}
       </div>
       <div>
-        <select {...register("gender")}>
-          <option value="m">Male</option>
-          <option value="f">Female</option>
-          <option value="a">Animal</option>
-          <option value="u">Unknown</option>
-        </select>
-        {errors.gender && typeof errors.gender.message === "string" && <span>{errors.gender.message}</span>}
+        <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+          Gender:
+        </label>
+        <Select {...register("gender")}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select Gender" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="m">Male</SelectItem>
+            <SelectItem value="f">Female</SelectItem>
+            <SelectItem value="a">Animal</SelectItem>
+            <SelectItem value="u">Unknown</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.gender && typeof errors.gender.message === "string" && (
+          <span className="text-red-600">{errors.gender.message}</span>
+        )}
       </div>
       <div>
-        <input type="text" {...register("address1")} placeholder="Address" />
-        {errors.address1 && typeof errors.address1.message === "string" && <span>{errors.address1.message}</span>}
+        <label htmlFor="drugName" className="block text-sm font-medium text-gray-700">
+          Drug Name:
+        </label>
+        <Input type="text" id="drugName" {...register("drugName")} placeholder="Drug Name" />
+        {errors.drugName && typeof errors.drugName.message === "string" && (
+          <span className="text-red-600">{errors.drugName.message}</span>
+        )}
       </div>
       <div>
-        <input type="text" {...register("city")} placeholder="City" />
-        {errors.city && typeof errors.city.message === "string" && <span>{errors.city.message}</span>}
+        <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+          Quantity:
+        </label>
+        <Input type="text" id="quantity" {...register("quantity")} placeholder="Quantity" />
+        {errors.quantity && typeof errors.quantity.message === "string" && (
+          <span className="text-red-600">{errors.quantity.message}</span>
+        )}
       </div>
       <div>
-        <input type="text" {...register("state")} placeholder="State" />
-        {errors.state && typeof errors.state.message === "string" && <span>{errors.state.message}</span>}
+        <label htmlFor="directions" className="block text-sm font-medium text-gray-700">
+          Directions:
+        </label>
+        <Textarea id="directions" {...register("directions")} placeholder="Directions" />
+        {errors.directions && typeof errors.directions.message === "string" && (
+          <span className="text-red-600">{errors.directions.message}</span>
+        )}
       </div>
-      <div>
-        <input type="text" {...register("zip")} placeholder="Zip" />
-        {errors.zip && typeof errors.zip.message === "string" && <span>{errors.zip.message}</span>}
-      </div>
-      <div>
-        <input type="text" {...register("country")} placeholder="Country" />
-        {errors.country && typeof errors.country.message === "string" && <span>{errors.country.message}</span>}
-      </div>
-      <div>
-        <input type="text" {...register("drugName")} placeholder="Drug Name" />
-        {errors.drugName && typeof errors.drugName.message === "string" && <span>{errors.drugName.message}</span>}
-      </div>
-      <div>
-        <input type="text" {...register("quantity")} placeholder="Quantity" />
-        {errors.quantity && typeof errors.quantity.message === "string" && <span>{errors.quantity.message}</span>}
-      </div>
-      <div>
-        <textarea {...register("directions")} placeholder="Directions" />
-        {errors.directions && typeof errors.directions.message === "string" && <span>{errors.directions.message}</span>}
-      </div>
-      {/* Add other fields as needed */}
-      <button type="submit">Submit Order</button>
+
+      <Button type="submit">Submit Order</Button>
     </form>
   );
 }

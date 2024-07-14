@@ -1,5 +1,4 @@
-export const BASE_URL = "https://api.example.com";
-export const LANDING_PAGE = "/create-order";
+export const LANDING_PAGE = "/orders/create";
 
 export const hoursOptions = Array.from({ length: 12 }, (_, index) => (index + 1).toString());
 export const minutesOptions = ["00", "15", "30", "45"];
