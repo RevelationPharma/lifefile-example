@@ -24,6 +24,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   const { getTheme } = await themeSessionResolver(request);
   return {
+    ENV: {
+      PRODUCTION: process.env.VERCEL_ENV === "production",
+    },
     theme: getTheme(),
   };
 }
@@ -91,6 +94,12 @@ export function App() {
         <Outlet />
         <Toaster />
         <ScrollRestoration />
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Suggested by RemixJS Docs
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
+          }}
+        />
         <Scripts />
         <LiveReload />
       </body>

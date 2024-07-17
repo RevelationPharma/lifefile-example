@@ -727,9 +727,24 @@ import { createCookieSessionStorage } from "@remix-run/node";
 import { redirect } from "@vercel/remix";
 import { createThemeSessionResolver } from "remix-themes";
 
-// app/data/shared.ts
-var isProduction = process?.env?.VERCEL_ENV === "production";
-var BASE_API_URL = process?.env?.LIFEFILE_API_BASE ?? "localhost:3000";
+// app/data/shared.server.ts
+import invariant from "tiny-invariant";
+var isProduction = process.env.VERCEL_ENV === "production";
+invariant(process.env.LIFEFILE_API_BASE, "Missing LIFEFILE_API_BASE");
+invariant(process.env.LIFEFILE_VENDOR_ID, "Missing LIFEFILE_VENDOR_ID");
+invariant(process.env.LIFEFILE_LOCATION_ID, "Missing LIFEFILE_LOCATION_ID");
+invariant(process.env.LIFEFILE_API_NETWORK_ID, "Missing LIFEFILE_API_NETWORK_ID");
+invariant(process.env.LIFEFILE_USERNAME, "Missing LIFEFILE_USERNAME");
+invariant(process.env.LIFEFILE_PASSWORD, "Missing LIFEFILE_PASSWORD");
+var API_HEADERS = {
+  "Content-Type": "application/json",
+  "X-Vendor-ID": process.env.LIFEFILE_VENDOR_ID || "",
+  "X-Location-ID": process.env.LIFEFILE_LOCATION_ID || "",
+  "X-API-Network-ID": process.env.LIFEFILE_API_NETWORK_ID || "",
+  Authorization: `Basic ${btoa(`${process.env.LIFEFILE_USERNAME}:${process.env.LIFEFILE_PASSWORD}`)}`,
+  "x-timezone-name": "America/New_York",
+  "x-timezone-offset": "-300"
+}, BASE_API_URL = process.env.LIFEFILE_API_BASE;
 
 // app/services/session.server.ts
 var sessionStorage = createCookieSessionStorage({
@@ -779,6 +794,9 @@ async function loader({ request }) {
   }
   let { getTheme } = await themeSessionResolver(request);
   return {
+    ENV: {
+      PRODUCTION: process.env.VERCEL_ENV === "production"
+    },
     theme: getTheme()
   };
 }
@@ -805,11 +823,11 @@ function AppWithProviders() {
   let data = useLoaderData();
   return /* @__PURE__ */ jsxDEV9(ThemeProvider, { specifiedTheme: data.theme, themeAction: "/action/set-theme", children: /* @__PURE__ */ jsxDEV9(App, {}, void 0, !1, {
     fileName: "app/root.tsx",
-    lineNumber: 64,
+    lineNumber: 67,
     columnNumber: 7
   }, this) }, void 0, !1, {
     fileName: "app/root.tsx",
-    lineNumber: 63,
+    lineNumber: 66,
     columnNumber: 5
   }, this);
 }
@@ -821,73 +839,89 @@ function App() {
     /* @__PURE__ */ jsxDEV9("head", { children: [
       /* @__PURE__ */ jsxDEV9("meta", { charSet: "utf-8" }, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 83,
+        lineNumber: 86,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 84,
+        lineNumber: 87,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9(Meta, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 85,
+        lineNumber: 88,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9(PreventFlashOnWrongTheme, { ssrTheme: Boolean(data.theme) }, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 86,
+        lineNumber: 89,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9(Links, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 87,
+        lineNumber: 90,
         columnNumber: 9
       }, this)
     ] }, void 0, !0, {
       fileName: "app/root.tsx",
-      lineNumber: 82,
+      lineNumber: 85,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ jsxDEV9("body", { children: [
       /* @__PURE__ */ jsxDEV9(Header, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 90,
+        lineNumber: 93,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9(Outlet, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 91,
+        lineNumber: 94,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9(Toaster, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 92,
+        lineNumber: 95,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9(ScrollRestoration, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 93,
+        lineNumber: 96,
         columnNumber: 9
       }, this),
+      /* @__PURE__ */ jsxDEV9(
+        "script",
+        {
+          dangerouslySetInnerHTML: {
+            __html: `window.ENV = ${JSON.stringify(data.ENV)}`
+          }
+        },
+        void 0,
+        !1,
+        {
+          fileName: "app/root.tsx",
+          lineNumber: 97,
+          columnNumber: 9
+        },
+        this
+      ),
       /* @__PURE__ */ jsxDEV9(Scripts, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 94,
+        lineNumber: 103,
         columnNumber: 9
       }, this),
       /* @__PURE__ */ jsxDEV9(LiveReload, {}, void 0, !1, {
         fileName: "app/root.tsx",
-        lineNumber: 95,
+        lineNumber: 104,
         columnNumber: 9
       }, this)
     ] }, void 0, !0, {
       fileName: "app/root.tsx",
-      lineNumber: 89,
+      lineNumber: 92,
       columnNumber: 7
     }, this)
   ] }, void 0, !0, {
     fileName: "app/root.tsx",
-    lineNumber: 81,
+    lineNumber: 84,
     columnNumber: 5
   }, this);
 }
@@ -895,8 +929,10 @@ function App() {
 // app/routes/api.order-update-shipping.ts
 var api_order_update_shipping_exports = {};
 __export(api_order_update_shipping_exports, {
-  action: () => action
+  action: () => action,
+  updateOrderShippingSchema: () => updateOrderShippingSchema
 });
+import * as process2 from "node:process";
 import { json } from "@remix-run/node";
 import { z } from "zod";
 var updateOrderShippingSchema = z.object({
@@ -915,15 +951,9 @@ var updateOrderShippingSchema = z.object({
   let formData = await request.json();
   try {
     updateOrderShippingSchema.parse(formData);
-    let response = await fetch(`https://api.lifefile.net/order/${formData.orderId}/shipping`, {
+    let response = await fetch(`${process2.env.LIFEFILE_API_BASE}/order/${formData.orderId}/shipping`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Vendor-ID": process.env.LIFEFILE_VENDOR_ID || "",
-        "X-Location-ID": process.env.LIFEFILE_LOCATION_ID || "",
-        "X-API-Network-ID": process.env.LIFEFILE_API_NETWORK_ID || "",
-        Authorization: `Basic ${btoa(`${process.env.LIFEFILE_USERNAME}:${process.env.LIFEFILE_PASSWORD}`)}`
-      },
+      headers: { ...API_HEADERS },
       body: JSON.stringify({ shipping: formData })
     });
     if (!response.ok)
@@ -938,7 +968,8 @@ var updateOrderShippingSchema = z.object({
 // app/routes/api.order-update-status.ts
 var api_order_update_status_exports = {};
 __export(api_order_update_status_exports, {
-  action: () => action2
+  action: () => action2,
+  updateOrderStatusSchema: () => updateOrderStatusSchema
 });
 import { json as json2 } from "@remix-run/node";
 import { z as z2 } from "zod";
@@ -949,15 +980,9 @@ var updateOrderStatusSchema = z2.object({
   let formData = await request.json();
   try {
     updateOrderStatusSchema.parse(formData);
-    let response = await fetch(`https://api.lifefile.net/order/${formData.orderId}/status`, {
+    let response = await fetch(`${BASE_API_URL}/order/${formData.orderId}/status`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Vendor-ID": process.env.LIFEFILE_VENDOR_ID || "",
-        "X-Location-ID": process.env.LIFEFILE_LOCATION_ID || "",
-        "X-API-Network-ID": process.env.LIFEFILE_API_NETWORK_ID || "",
-        Authorization: `Basic ${btoa(`${process.env.LIFEFILE_USERNAME}:${process.env.LIFEFILE_PASSWORD}`)}`
-      },
+      headers: { ...API_HEADERS },
       body: JSON.stringify({ status: formData.status })
     });
     if (!response.ok)
@@ -978,12 +1003,156 @@ __export(orders_update_shipping_exports, {
 // app/components/UpdateOrderShippingForm.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z3 from "zod";
 
-// app/components/ui/input.tsx
+// app/components/ui/form.tsx
+import { Slot as Slot2 } from "@radix-ui/react-slot";
+import * as React6 from "react";
+import {
+  Controller,
+  FormProvider,
+  useFormContext
+} from "react-hook-form";
+
+// app/components/ui/label.tsx
+import * as LabelPrimitive from "@radix-ui/react-label";
+import { cva as cva3 } from "class-variance-authority";
 import * as React5 from "react";
 import { jsxDEV as jsxDEV10 } from "react/jsx-dev-runtime";
-var Input = React5.forwardRef(({ className, type, ...props }, ref) => /* @__PURE__ */ jsxDEV10(
+var labelVariants = cva3("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"), Label2 = React5.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV10(LabelPrimitive.Root, { ref, className: cn(labelVariants(), className), ...props }, void 0, !1, {
+  fileName: "app/components/ui/label.tsx",
+  lineNumber: 13,
+  columnNumber: 3
+}, this));
+Label2.displayName = LabelPrimitive.Root.displayName;
+
+// app/components/ui/form.tsx
+import { jsxDEV as jsxDEV11 } from "react/jsx-dev-runtime";
+var Form = FormProvider, FormFieldContext = React6.createContext({});
+var useFormField = () => {
+  let fieldContext = React6.useContext(FormFieldContext), itemContext = React6.useContext(FormItemContext), { getFieldState, formState } = useFormContext(), fieldState = getFieldState(fieldContext.name, formState);
+  if (!fieldContext)
+    throw new Error("useFormField should be used within <FormField>");
+  let { id } = itemContext;
+  return {
+    id,
+    name: fieldContext.name,
+    formItemId: `${id}-form-item`,
+    formDescriptionId: `${id}-form-item-description`,
+    formMessageId: `${id}-form-item-message`,
+    ...fieldState
+  };
+}, FormItemContext = React6.createContext({}), FormItem = React6.forwardRef(
+  ({ className, ...props }, ref) => {
+    let id = React6.useId();
+    return /* @__PURE__ */ jsxDEV11(FormItemContext.Provider, { value: { id }, children: /* @__PURE__ */ jsxDEV11("div", { ref, className: cn("space-y-2", className), ...props }, void 0, !1, {
+      fileName: "app/components/ui/form.tsx",
+      lineNumber: 75,
+      columnNumber: 9
+    }, this) }, void 0, !1, {
+      fileName: "app/components/ui/form.tsx",
+      lineNumber: 74,
+      columnNumber: 7
+    }, this);
+  }
+);
+FormItem.displayName = "FormItem";
+var FormLabel = React6.forwardRef(({ className, ...props }, ref) => {
+  let { error, formItemId } = useFormField();
+  return /* @__PURE__ */ jsxDEV11(
+    Label2,
+    {
+      ref,
+      className: cn(error && "text-red-500 dark:text-red-900", className),
+      htmlFor: formItemId,
+      ...props
+    },
+    void 0,
+    !1,
+    {
+      fileName: "app/components/ui/form.tsx",
+      lineNumber: 89,
+      columnNumber: 5
+    },
+    this
+  );
+});
+FormLabel.displayName = "FormLabel";
+var FormControl = React6.forwardRef(
+  ({ ...props }, ref) => {
+    let { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+    return /* @__PURE__ */ jsxDEV11(
+      Slot2,
+      {
+        ref,
+        id: formItemId,
+        "aria-describedby": error ? `${formDescriptionId} ${formMessageId}` : `${formDescriptionId}`,
+        "aria-invalid": !!error,
+        ...props
+      },
+      void 0,
+      !1,
+      {
+        fileName: "app/components/ui/form.tsx",
+        lineNumber: 104,
+        columnNumber: 7
+      },
+      this
+    );
+  }
+);
+FormControl.displayName = "FormControl";
+var FormDescription = React6.forwardRef(
+  ({ className, ...props }, ref) => {
+    let { formDescriptionId } = useFormField();
+    return /* @__PURE__ */ jsxDEV11(
+      "p",
+      {
+        ref,
+        id: formDescriptionId,
+        className: cn("text-sm text-neutral-500 dark:text-neutral-400", className),
+        ...props
+      },
+      void 0,
+      !1,
+      {
+        fileName: "app/components/ui/form.tsx",
+        lineNumber: 121,
+        columnNumber: 7
+      },
+      this
+    );
+  }
+);
+FormDescription.displayName = "FormDescription";
+var FormMessage = React6.forwardRef(
+  ({ className, children, ...props }, ref) => {
+    let { error, formMessageId } = useFormField(), body = error ? String(error?.message) : children;
+    return body ? /* @__PURE__ */ jsxDEV11(
+      "p",
+      {
+        ref,
+        id: formMessageId,
+        className: cn("text-sm font-medium text-red-500 dark:text-red-900", className),
+        ...props,
+        children: body
+      },
+      void 0,
+      !1,
+      {
+        fileName: "app/components/ui/form.tsx",
+        lineNumber: 142,
+        columnNumber: 7
+      },
+      this
+    ) : null;
+  }
+);
+FormMessage.displayName = "FormMessage";
+
+// app/components/ui/input.tsx
+import * as React7 from "react";
+import { jsxDEV as jsxDEV12 } from "react/jsx-dev-runtime";
+var Input = React7.forwardRef(({ className, type, ...props }, ref) => /* @__PURE__ */ jsxDEV12(
   "input",
   {
     type,
@@ -1006,339 +1175,76 @@ var Input = React5.forwardRef(({ className, type, ...props }, ref) => /* @__PURE
 Input.displayName = "Input";
 
 // app/components/UpdateOrderShippingForm.tsx
-import { jsxDEV as jsxDEV11 } from "react/jsx-dev-runtime";
-var updateOrderShippingSchema2 = z3.object({
-  orderId: z3.number().int(),
-  recipientType: z3.enum(["clinic", "patient"]),
-  recipientLastName: z3.string().max(30),
-  recipientFirstName: z3.string().max(30),
-  recipientPhone: z3.string().max(16),
-  recipientEmail: z3.string().max(100),
-  addressLine1: z3.string().max(60),
-  city: z3.string().max(30),
-  state: z3.string().max(2),
-  zipCode: z3.string().max(10),
-  country: z3.string().max(2)
-});
+import { jsxDEV as jsxDEV13 } from "react/jsx-dev-runtime";
 function UpdateOrderShippingForm() {
-  let {
+  let form = useForm({
+    resolver: zodResolver(updateOrderShippingSchema)
+  }), {
     register,
-    handleSubmit,
     formState: { errors }
-  } = useForm({
-    resolver: zodResolver(updateOrderShippingSchema2)
-  });
-  return /* @__PURE__ */ jsxDEV11("form", { className: "space-y-4", onSubmit: handleSubmit(async (data) => {
+  } = form, onSubmit = async (data) => {
     let response = await fetch(`${BASE_API_URL}/update-order-shipping`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Vendor-ID": "11324",
-        // Replace with actual Vendor ID
-        "X-Location-ID": "110033",
-        // Replace with actual Location ID
-        "X-API-Network-ID": "233582"
-        // Replace with actual API Network ID
-      },
+      headers: { ...API_HEADERS },
       body: JSON.stringify(data)
     }), result = await response.json();
     response.ok ? console.log("Order shipping updated successfully:", result) : console.error("Failed to update order shipping:", result);
-  }), children: [
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "orderId", className: "block text-sm font-medium text-gray-700", children: "Order ID:" }, void 0, !1, {
+  };
+  return /* @__PURE__ */ jsxDEV13(Form, { ...form, children: [
+    /* @__PURE__ */ jsxDEV13(FormItem, { children: [
+      /* @__PURE__ */ jsxDEV13(FormLabel, { htmlFor: "orderId", children: "Order ID:" }, void 0, !1, {
         fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 55,
+        lineNumber: 37,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "number", id: "orderId", ...register("orderId", { valueAsNumber: !0 }), placeholder: "Order ID" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV13(FormControl, { children: /* @__PURE__ */ jsxDEV13(Input, { type: "number", id: "orderId", ...register("orderId", { valueAsNumber: !0 }), placeholder: "Order ID" }, void 0, !1, {
         fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 58,
-        columnNumber: 9
-      }, this),
-      errors.orderId && typeof errors.orderId.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.orderId.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 60,
+        lineNumber: 39,
         columnNumber: 11
+      }, this) }, void 0, !1, {
+        fileName: "app/components/UpdateOrderShippingForm.tsx",
+        lineNumber: 38,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV13(FormMessage, {}, void 0, !1, {
+        fileName: "app/components/UpdateOrderShippingForm.tsx",
+        lineNumber: 41,
+        columnNumber: 9
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 54,
+      lineNumber: 36,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "recipientType", className: "block text-sm font-medium text-gray-700", children: "Recipient Type:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 64,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11("select", { id: "recipientType", ...register("recipientType"), className: "input", children: [
-        /* @__PURE__ */ jsxDEV11("option", { value: "clinic", children: "Clinic" }, void 0, !1, {
-          fileName: "app/components/UpdateOrderShippingForm.tsx",
-          lineNumber: 68,
-          columnNumber: 11
-        }, this),
-        /* @__PURE__ */ jsxDEV11("option", { value: "patient", children: "Patient" }, void 0, !1, {
-          fileName: "app/components/UpdateOrderShippingForm.tsx",
-          lineNumber: 69,
-          columnNumber: 11
-        }, this)
-      ] }, void 0, !0, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 67,
-        columnNumber: 9
-      }, this),
-      errors.recipientType && typeof errors.recipientType.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.recipientType.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 72,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
+    /* @__PURE__ */ jsxDEV13(Button, { type: "submit", children: "Update Shipping" }, void 0, !1, {
       fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 63,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "recipientLastName", className: "block text-sm font-medium text-gray-700", children: "Recipient Last Name:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 76,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(
-        Input,
-        {
-          type: "text",
-          id: "recipientLastName",
-          ...register("recipientLastName"),
-          placeholder: "Recipient Last Name"
-        },
-        void 0,
-        !1,
-        {
-          fileName: "app/components/UpdateOrderShippingForm.tsx",
-          lineNumber: 79,
-          columnNumber: 9
-        },
-        this
-      ),
-      errors.recipientLastName && typeof errors.recipientLastName.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.recipientLastName.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 86,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 75,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "recipientFirstName", className: "block text-sm font-medium text-gray-700", children: "Recipient First Name:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 90,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(
-        Input,
-        {
-          type: "text",
-          id: "recipientFirstName",
-          ...register("recipientFirstName"),
-          placeholder: "Recipient First Name"
-        },
-        void 0,
-        !1,
-        {
-          fileName: "app/components/UpdateOrderShippingForm.tsx",
-          lineNumber: 93,
-          columnNumber: 9
-        },
-        this
-      ),
-      errors.recipientFirstName && typeof errors.recipientFirstName.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.recipientFirstName.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 100,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 89,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "recipientPhone", className: "block text-sm font-medium text-gray-700", children: "Recipient Phone:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 104,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "text", id: "recipientPhone", ...register("recipientPhone"), placeholder: "Recipient Phone" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 107,
-        columnNumber: 9
-      }, this),
-      errors.recipientPhone && typeof errors.recipientPhone.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.recipientPhone.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 109,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 103,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "recipientEmail", className: "block text-sm font-medium text-gray-700", children: "Recipient Email:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 113,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "email", id: "recipientEmail", ...register("recipientEmail"), placeholder: "Recipient Email" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 116,
-        columnNumber: 9
-      }, this),
-      errors.recipientEmail && typeof errors.recipientEmail.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.recipientEmail.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 118,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 112,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "addressLine1", className: "block text-sm font-medium text-gray-700", children: "Address Line 1:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 122,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "text", id: "addressLine1", ...register("addressLine1"), placeholder: "Address Line 1" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 125,
-        columnNumber: 9
-      }, this),
-      errors.addressLine1 && typeof errors.addressLine1.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.addressLine1.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 127,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 121,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "city", className: "block text-sm font-medium text-gray-700", children: "City:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 131,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "text", id: "city", ...register("city"), placeholder: "City" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 134,
-        columnNumber: 9
-      }, this),
-      errors.city && typeof errors.city.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.city.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 136,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 130,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "state", className: "block text-sm font-medium text-gray-700", children: "State:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 140,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "text", id: "state", ...register("state"), placeholder: "State" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 143,
-        columnNumber: 9
-      }, this),
-      errors.state && typeof errors.state.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.state.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 145,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 139,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "zipCode", className: "block text-sm font-medium text-gray-700", children: "Zip Code:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 149,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "text", id: "zipCode", ...register("zipCode"), placeholder: "Zip Code" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 152,
-        columnNumber: 9
-      }, this),
-      errors.zipCode && typeof errors.zipCode.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.zipCode.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 154,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 148,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11("div", { children: [
-      /* @__PURE__ */ jsxDEV11("label", { htmlFor: "country", className: "block text-sm font-medium text-gray-700", children: "Country:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 158,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV11(Input, { type: "text", id: "country", ...register("country"), placeholder: "Country" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 161,
-        columnNumber: 9
-      }, this),
-      errors.country && typeof errors.country.message == "string" && /* @__PURE__ */ jsxDEV11("span", { className: "text-red-600", children: errors.country.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderShippingForm.tsx",
-        lineNumber: 163,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 157,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV11(Button, { type: "submit", children: "Update Shipping" }, void 0, !1, {
-      fileName: "app/components/UpdateOrderShippingForm.tsx",
-      lineNumber: 166,
+      lineNumber: 142,
       columnNumber: 7
     }, this)
   ] }, void 0, !0, {
     fileName: "app/components/UpdateOrderShippingForm.tsx",
-    lineNumber: 53,
+    lineNumber: 35,
     columnNumber: 5
   }, this);
 }
 
 // app/components/ui/card.tsx
-import * as React7 from "react";
+import * as React9 from "react";
 
 // app/components/ui/typography.tsx
 import { clsx as clsx4 } from "clsx";
-import React6 from "react";
-import { jsxDEV as jsxDEV12 } from "react/jsx-dev-runtime";
-var TypographyH1 = React6.forwardRef(
-  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV12("h1", { ref, className: clsx4("scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl", className), children }, void 0, !1, {
+import React8 from "react";
+import { jsxDEV as jsxDEV14 } from "react/jsx-dev-runtime";
+var TypographyH1 = React8.forwardRef(
+  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV14("h1", { ref, className: clsx4("scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl", className), children }, void 0, !1, {
     fileName: "app/components/ui/typography.tsx",
     lineNumber: 7,
     columnNumber: 7
   }, this)
 );
 TypographyH1.displayName = "TypographyH1";
-var TypographyH2 = React6.forwardRef(
-  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV12(
+var TypographyH2 = React8.forwardRef(
+  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV14(
     "h2",
     {
       ref,
@@ -1356,16 +1262,16 @@ var TypographyH2 = React6.forwardRef(
   )
 );
 TypographyH2.displayName = "TypographyH2";
-var TypographyH3 = React6.forwardRef(
-  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV12("h3", { ref, className: clsx4("scroll-m-20 text-2xl font-semibold tracking-tight", className), children }, void 0, !1, {
+var TypographyH3 = React8.forwardRef(
+  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV14("h3", { ref, className: clsx4("scroll-m-20 text-2xl font-semibold tracking-tight", className), children }, void 0, !1, {
     fileName: "app/components/ui/typography.tsx",
     lineNumber: 32,
     columnNumber: 7
   }, this)
 );
 TypographyH3.displayName = "TypographyH3";
-var TypographyH4 = React6.forwardRef(
-  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV12("h4", { ref, className: clsx4("scroll-m-20 text-xl font-semibold tracking-tight", className), children }, void 0, !1, {
+var TypographyH4 = React8.forwardRef(
+  ({ children, className = "" }, ref) => /* @__PURE__ */ jsxDEV14("h4", { ref, className: clsx4("scroll-m-20 text-xl font-semibold tracking-tight", className), children }, void 0, !1, {
     fileName: "app/components/ui/typography.tsx",
     lineNumber: 43,
     columnNumber: 7
@@ -1374,8 +1280,8 @@ var TypographyH4 = React6.forwardRef(
 TypographyH4.displayName = "TypographyH4";
 
 // app/components/ui/card.tsx
-import { jsxDEV as jsxDEV13 } from "react/jsx-dev-runtime";
-var Card = React7.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV13(
+import { jsxDEV as jsxDEV15 } from "react/jsx-dev-runtime";
+var Card = React9.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV15(
   "div",
   {
     ref,
@@ -1395,40 +1301,40 @@ var Card = React7.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ j
   this
 ));
 Card.displayName = "Card";
-var CardHeader = React7.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV13("div", { ref, className: cn("flex flex-col space-y-1.5 p-6", className), ...props }, void 0, !1, {
+var CardHeader = React9.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV15("div", { ref, className: cn("flex flex-col space-y-1.5 p-6", className), ...props }, void 0, !1, {
     fileName: "app/components/ui/card.tsx",
     lineNumber: 20,
     columnNumber: 5
   }, this)
 );
 CardHeader.displayName = "CardHeader";
-var CardTitle = React7.forwardRef(
-  ({ children, className, ...props }, ref) => /* @__PURE__ */ jsxDEV13(TypographyH3, { ref, className, ...props, children }, void 0, !1, {
+var CardTitle = React9.forwardRef(
+  ({ children, className, ...props }, ref) => /* @__PURE__ */ jsxDEV15(TypographyH3, { ref, className, ...props, children }, void 0, !1, {
     fileName: "app/components/ui/card.tsx",
     lineNumber: 27,
     columnNumber: 5
   }, this)
 );
 CardTitle.displayName = "CardTitle";
-var CardDescription = React7.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV13("p", { ref, className: cn("text-sm text-neutral-500 dark:text-neutral-400", className), ...props }, void 0, !1, {
+var CardDescription = React9.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV15("p", { ref, className: cn("text-sm text-neutral-500 dark:text-neutral-400", className), ...props }, void 0, !1, {
     fileName: "app/components/ui/card.tsx",
     lineNumber: 36,
     columnNumber: 5
   }, this)
 );
 CardDescription.displayName = "CardDescription";
-var CardContent = React7.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV13("div", { ref, className: cn("p-6 pt-0", className), ...props }, void 0, !1, {
+var CardContent = React9.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV15("div", { ref, className: cn("p-6 pt-0", className), ...props }, void 0, !1, {
     fileName: "app/components/ui/card.tsx",
     lineNumber: 42,
     columnNumber: 37
   }, this)
 );
 CardContent.displayName = "CardContent";
-var CardFooter = React7.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV13("div", { ref, className: cn("flex items-center p-6 pt-0", className), ...props }, void 0, !1, {
+var CardFooter = React9.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV15("div", { ref, className: cn("flex items-center p-6 pt-0", className), ...props }, void 0, !1, {
     fileName: "app/components/ui/card.tsx",
     lineNumber: 48,
     columnNumber: 5
@@ -1437,15 +1343,15 @@ var CardFooter = React7.forwardRef(
 CardFooter.displayName = "CardFooter";
 
 // app/routes/orders.update-shipping.tsx
-import { jsxDEV as jsxDEV14 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV16 } from "react/jsx-dev-runtime";
 function OrdersUpdateShipping() {
-  return /* @__PURE__ */ jsxDEV14(Card, { className: "m-auto max-w-lg p-4", children: [
-    /* @__PURE__ */ jsxDEV14("h1", { className: "text-neutral-600 font-bold text-sm mb-4", children: "Update Order Shipping" }, void 0, !1, {
+  return /* @__PURE__ */ jsxDEV16(Card, { className: "m-auto max-w-lg p-4", children: [
+    /* @__PURE__ */ jsxDEV16("h1", { className: "text-neutral-600 font-bold text-sm mb-4", children: "Update Order Shipping" }, void 0, !1, {
       fileName: "app/routes/orders.update-shipping.tsx",
       lineNumber: 9,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV14(UpdateOrderShippingForm, {}, void 0, !1, {
+    /* @__PURE__ */ jsxDEV16(UpdateOrderShippingForm, {}, void 0, !1, {
       fileName: "app/routes/orders.update-shipping.tsx",
       lineNumber: 10,
       columnNumber: 7
@@ -1466,48 +1372,56 @@ __export(orders_update_status_exports, {
 // app/components/UpdateOrderStatusForm.tsx
 import { zodResolver as zodResolver2 } from "@hookform/resolvers/zod";
 import { useForm as useForm2 } from "react-hook-form";
-import * as z4 from "zod";
-import { jsxDEV as jsxDEV15 } from "react/jsx-dev-runtime";
-var updateOrderStatusSchema2 = z4.object({
-  orderId: z4.number().int(),
-  status: z4.string()
-});
+import { jsxDEV as jsxDEV17 } from "react/jsx-dev-runtime";
 function UpdateOrderStatusForm() {
   let {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm2({
-    resolver: zodResolver2(updateOrderStatusSchema2)
+    resolver: zodResolver2(updateOrderStatusSchema)
   });
-  return /* @__PURE__ */ jsxDEV15("form", { className: "space-y-4", onSubmit: handleSubmit(async (data) => {
-    let response = await fetch(`${process.env.LIFEFILE_API_BASE}/update-order-status`, {
+  return /* @__PURE__ */ jsxDEV17("form", { className: "space-y-4", onSubmit: handleSubmit(async (data) => {
+    let response = await fetch(`${BASE_API_URL}/update-order-status`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Vendor-ID": "11324",
-        // Replace with actual Vendor ID
-        "X-Location-ID": "110033",
-        // Replace with actual Location ID
-        "X-API-Network-ID": "233582"
-        // Replace with actual API Network ID
-      },
+      headers: { ...API_HEADERS },
       body: JSON.stringify(data)
     }), result = await response.json();
     response.ok ? console.log("Order status updated successfully:", result) : console.error("Failed to update order status:", result);
   }), children: [
-    /* @__PURE__ */ jsxDEV15("div", { children: [
-      /* @__PURE__ */ jsxDEV15("label", { htmlFor: "orderId", className: "block text-sm font-medium text-gray-700", children: "Order ID:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV17("div", { children: [
+      /* @__PURE__ */ jsxDEV17("label", { htmlFor: "orderId", className: "block text-sm font-medium text-gray-700", children: "Order ID:" }, void 0, !1, {
+        fileName: "app/components/UpdateOrderStatusForm.tsx",
+        lineNumber: 36,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV17(Input, { type: "number", id: "orderId", ...register("orderId", { valueAsNumber: !0 }), placeholder: "Order ID" }, void 0, !1, {
+        fileName: "app/components/UpdateOrderStatusForm.tsx",
+        lineNumber: 39,
+        columnNumber: 9
+      }, this),
+      errors.orderId && typeof errors.orderId.message == "string" && /* @__PURE__ */ jsxDEV17("span", { className: "text-red-600", children: errors.orderId.message }, void 0, !1, {
+        fileName: "app/components/UpdateOrderStatusForm.tsx",
+        lineNumber: 41,
+        columnNumber: 11
+      }, this)
+    ] }, void 0, !0, {
+      fileName: "app/components/UpdateOrderStatusForm.tsx",
+      lineNumber: 35,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV17("div", { children: [
+      /* @__PURE__ */ jsxDEV17("label", { htmlFor: "status", className: "block text-sm font-medium text-gray-700", children: "Status:" }, void 0, !1, {
         fileName: "app/components/UpdateOrderStatusForm.tsx",
         lineNumber: 45,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV15(Input, { type: "number", id: "orderId", ...register("orderId", { valueAsNumber: !0 }), placeholder: "Order ID" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV17(Input, { type: "text", id: "status", ...register("status"), placeholder: "Status" }, void 0, !1, {
         fileName: "app/components/UpdateOrderStatusForm.tsx",
         lineNumber: 48,
         columnNumber: 9
       }, this),
-      errors.orderId && typeof errors.orderId.message == "string" && /* @__PURE__ */ jsxDEV15("span", { className: "text-red-600", children: errors.orderId.message }, void 0, !1, {
+      errors.status && typeof errors.status.message == "string" && /* @__PURE__ */ jsxDEV17("span", { className: "text-red-600", children: errors.status.message }, void 0, !1, {
         fileName: "app/components/UpdateOrderStatusForm.tsx",
         lineNumber: 50,
         columnNumber: 11
@@ -1517,49 +1431,28 @@ function UpdateOrderStatusForm() {
       lineNumber: 44,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV15("div", { children: [
-      /* @__PURE__ */ jsxDEV15("label", { htmlFor: "status", className: "block text-sm font-medium text-gray-700", children: "Status:" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderStatusForm.tsx",
-        lineNumber: 54,
-        columnNumber: 9
-      }, this),
-      /* @__PURE__ */ jsxDEV15(Input, { type: "text", id: "status", ...register("status"), placeholder: "Status" }, void 0, !1, {
-        fileName: "app/components/UpdateOrderStatusForm.tsx",
-        lineNumber: 57,
-        columnNumber: 9
-      }, this),
-      errors.status && typeof errors.status.message == "string" && /* @__PURE__ */ jsxDEV15("span", { className: "text-red-600", children: errors.status.message }, void 0, !1, {
-        fileName: "app/components/UpdateOrderStatusForm.tsx",
-        lineNumber: 59,
-        columnNumber: 11
-      }, this)
-    ] }, void 0, !0, {
+    /* @__PURE__ */ jsxDEV17(Button, { type: "submit", children: "Update Status" }, void 0, !1, {
       fileName: "app/components/UpdateOrderStatusForm.tsx",
       lineNumber: 53,
-      columnNumber: 7
-    }, this),
-    /* @__PURE__ */ jsxDEV15(Button, { type: "submit", children: "Update Status" }, void 0, !1, {
-      fileName: "app/components/UpdateOrderStatusForm.tsx",
-      lineNumber: 62,
       columnNumber: 7
     }, this)
   ] }, void 0, !0, {
     fileName: "app/components/UpdateOrderStatusForm.tsx",
-    lineNumber: 43,
+    lineNumber: 34,
     columnNumber: 5
   }, this);
 }
 
 // app/routes/orders.update-status.tsx
-import { jsxDEV as jsxDEV16 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV18 } from "react/jsx-dev-runtime";
 function OrdersUpdateStatus() {
-  return /* @__PURE__ */ jsxDEV16(Card, { className: "m-auto max-w-lg p-4", children: [
-    /* @__PURE__ */ jsxDEV16("h1", { className: "text-neutral-600 font-bold text-sm mb-4", children: "Update Order Status" }, void 0, !1, {
+  return /* @__PURE__ */ jsxDEV18(Card, { className: "m-auto max-w-lg p-4", children: [
+    /* @__PURE__ */ jsxDEV18("h1", { className: "text-neutral-600 font-bold text-sm mb-4", children: "Update Order Status" }, void 0, !1, {
       fileName: "app/routes/orders.update-status.tsx",
       lineNumber: 9,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV16(UpdateOrderStatusForm, {}, void 0, !1, {
+    /* @__PURE__ */ jsxDEV18(UpdateOrderStatusForm, {}, void 0, !1, {
       fileName: "app/routes/orders.update-status.tsx",
       lineNumber: 10,
       columnNumber: 7
@@ -1584,18 +1477,11 @@ var api_post_order_exports = {};
 __export(api_post_order_exports, {
   action: () => action4
 });
-import * as process2 from "node:process";
 import { json as json3 } from "@remix-run/node";
-import invariant from "tiny-invariant";
-invariant(process2.env.LIFEFILE_API_BASE, "Missing LIFEFILE_API_BASE");
-invariant(process2.env.LIFEFILE_VENDOR_ID, "Missing LIFEFILE_VENDOR_ID");
-invariant(process2.env.LIFEFILE_LOCATION_ID, "Missing LIFEFILE_LOCATION_ID");
-invariant(process2.env.LIFEFILE_API_NETWORK_ID, "Missing LIFEFILE_API_NETWORK_ID");
-invariant(process2.env.LIFEFILE_USERNAME, "Missing LIFEFILE_USERNAME");
-invariant(process2.env.LIFEFILE_PASSWORD, "Missing LIFEFILE_PASSWORD");
 var action4 = async ({ request }) => {
   let formData = await request.formData(), orderData = {
     message: {
+      // NOTE: This ID should be unique and can reflect the ID from your own system.
       id: formData.get("referenceId"),
       sentTime: (/* @__PURE__ */ new Date()).toISOString()
     },
@@ -1627,15 +1513,9 @@ var action4 = async ({ request }) => {
     }
   };
   console.log("-_________orderData:", orderData);
-  let response = await fetch(`${process2.env.LIFEFILE_API_BASE}/order`, {
+  let response = await fetch(`${BASE_API_URL}/order`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Vendor-ID": process2.env.LIFEFILE_VENDOR_ID || "",
-      "X-Location-ID": process2.env.LIFEFILE_LOCATION_ID || "",
-      "X-API-Network-ID": process2.env.LIFEFILE_API_NETWORK_ID || "",
-      Authorization: `Basic ${btoa(`${process2.env.LIFEFILE_USERNAME}:${process2.env.LIFEFILE_PASSWORD}`)}`
-    },
+    headers: { ...API_HEADERS },
     body: JSON.stringify(orderData)
   });
   if (console.log("Response:", response), !response.ok)
@@ -1649,9 +1529,9 @@ var orders_index_exports = {};
 __export(orders_index_exports, {
   OrdersIndex: () => OrdersIndex
 });
-import { jsxDEV as jsxDEV17 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV19 } from "react/jsx-dev-runtime";
 function OrdersIndex() {
-  return /* @__PURE__ */ jsxDEV17("div", { children: "Nothing here" }, void 0, !1, {
+  return /* @__PURE__ */ jsxDEV19("div", { children: "Nothing here" }, void 0, !1, {
     fileName: "app/routes/orders._index.tsx",
     lineNumber: 2,
     columnNumber: 10
@@ -1666,8 +1546,9 @@ __export(orders_create_exports, {
 
 // app/components/OrderForm.tsx
 import { zodResolver as zodResolver3 } from "@hookform/resolvers/zod";
+import { useTransition } from "react";
 import { useForm as useForm3 } from "react-hook-form";
-import * as z5 from "zod";
+import * as z3 from "zod";
 
 // app/components/ui/date-picker.tsx
 import { format } from "date-fns";
@@ -1678,9 +1559,9 @@ import { clsx as clsx5 } from "clsx";
 // app/components/ui/calendar.tsx
 import { ChevronLeft, ChevronRight as ChevronRight2 } from "lucide-react";
 import { DayPicker } from "react-day-picker";
-import { jsxDEV as jsxDEV18 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV20 } from "react/jsx-dev-runtime";
 function Calendar({ className, classNames, showOutsideDays = !0, ...props }) {
-  return /* @__PURE__ */ jsxDEV18(
+  return /* @__PURE__ */ jsxDEV20(
     DayPicker,
     {
       showOutsideDays,
@@ -1713,12 +1594,12 @@ function Calendar({ className, classNames, showOutsideDays = !0, ...props }) {
         ...classNames
       },
       components: {
-        IconLeft: ({ ...props2 }) => /* @__PURE__ */ jsxDEV18(ChevronLeft, { className: "h-4 w-4" }, void 0, !1, {
+        IconLeft: ({ ...props2 }) => /* @__PURE__ */ jsxDEV20(ChevronLeft, { className: "h-4 w-4" }, void 0, !1, {
           fileName: "app/components/ui/calendar.tsx",
           lineNumber: 46,
           columnNumber: 37
         }, this),
-        IconRight: ({ ...props2 }) => /* @__PURE__ */ jsxDEV18(ChevronRight2, { className: "h-4 w-4" }, void 0, !1, {
+        IconRight: ({ ...props2 }) => /* @__PURE__ */ jsxDEV20(ChevronRight2, { className: "h-4 w-4" }, void 0, !1, {
           fileName: "app/components/ui/calendar.tsx",
           lineNumber: 47,
           columnNumber: 38
@@ -1740,9 +1621,9 @@ Calendar.displayName = "Calendar";
 
 // app/components/ui/popover.tsx
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-import * as React8 from "react";
-import { jsxDEV as jsxDEV19 } from "react/jsx-dev-runtime";
-var Popover = PopoverPrimitive.Root, PopoverTrigger = PopoverPrimitive.Trigger, PopoverContent = React8.forwardRef(({ className, align = "center", sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxDEV19(PopoverPrimitive.Portal, { children: /* @__PURE__ */ jsxDEV19(
+import * as React10 from "react";
+import { jsxDEV as jsxDEV21 } from "react/jsx-dev-runtime";
+var Popover = PopoverPrimitive.Root, PopoverTrigger = PopoverPrimitive.Trigger, PopoverContent = React10.forwardRef(({ className, align = "center", sideOffset = 4, ...props }, ref) => /* @__PURE__ */ jsxDEV21(PopoverPrimitive.Portal, { children: /* @__PURE__ */ jsxDEV21(
   PopoverPrimitive.Content,
   {
     ref,
@@ -1770,26 +1651,26 @@ var Popover = PopoverPrimitive.Root, PopoverTrigger = PopoverPrimitive.Trigger, 
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
 // app/components/ui/date-picker.tsx
-import { jsxDEV as jsxDEV20 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV22 } from "react/jsx-dev-runtime";
 function DatePicker({
   onDateChange
 }) {
   let [date, setDate] = useState2();
   return useEffect3(() => {
     onDateChange && (console.log("date change inside picker", date), onDateChange(date));
-  }, [date, onDateChange]), /* @__PURE__ */ jsxDEV20(Popover, { children: [
-    /* @__PURE__ */ jsxDEV20(PopoverTrigger, { asChild: !0, children: /* @__PURE__ */ jsxDEV20(
+  }, [date, onDateChange]), /* @__PURE__ */ jsxDEV22(Popover, { children: [
+    /* @__PURE__ */ jsxDEV22(PopoverTrigger, { asChild: !0, children: /* @__PURE__ */ jsxDEV22(
       Button,
       {
         variant: "outline",
         className: clsx5("w-[280px] justify-start text-left font-normal", !date && "text-muted-foreground"),
         children: [
-          /* @__PURE__ */ jsxDEV20(CalendarIcon, { className: "mr-2 h-4 w-4" }, void 0, !1, {
+          /* @__PURE__ */ jsxDEV22(CalendarIcon, { className: "mr-2 h-4 w-4" }, void 0, !1, {
             fileName: "app/components/ui/date-picker.tsx",
             lineNumber: 33,
             columnNumber: 11
           }, this),
-          date ? format(date, "PPP") : /* @__PURE__ */ jsxDEV20("span", { children: "Pick a date" }, void 0, !1, {
+          date ? format(date, "PPP") : /* @__PURE__ */ jsxDEV22("span", { children: "Pick a date" }, void 0, !1, {
             fileName: "app/components/ui/date-picker.tsx",
             lineNumber: 34,
             columnNumber: 41
@@ -1809,7 +1690,7 @@ function DatePicker({
       lineNumber: 28,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV20(PopoverContent, { className: "w-auto p-0", children: /* @__PURE__ */ jsxDEV20(Calendar, { mode: "single", selected: date, onSelect: setDate, initialFocus: !0 }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV22(PopoverContent, { className: "w-auto p-0", children: /* @__PURE__ */ jsxDEV22(Calendar, { mode: "single", selected: date, onSelect: setDate, initialFocus: !0 }, void 0, !1, {
       fileName: "app/components/ui/date-picker.tsx",
       lineNumber: 39,
       columnNumber: 9
@@ -1826,12 +1707,12 @@ function DatePicker({
 }
 
 // app/components/ui/select.tsx
-import * as React9 from "react";
+import * as React11 from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check as Check2, ChevronDown, ChevronUp } from "lucide-react";
-import { jsxDEV as jsxDEV21 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV23 } from "react/jsx-dev-runtime";
 var Select = SelectPrimitive.Root;
-var SelectValue = SelectPrimitive.Value, SelectTrigger = React9.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsxDEV21(
+var SelectValue = SelectPrimitive.Value, SelectTrigger = React11.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsxDEV23(
   SelectPrimitive.Trigger,
   {
     ref,
@@ -1842,7 +1723,7 @@ var SelectValue = SelectPrimitive.Value, SelectTrigger = React9.forwardRef(({ cl
     ...props,
     children: [
       children,
-      /* @__PURE__ */ jsxDEV21(SelectPrimitive.Icon, { asChild: !0, children: /* @__PURE__ */ jsxDEV21(ChevronDown, { className: "h-4 w-4 opacity-50" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV23(SelectPrimitive.Icon, { asChild: !0, children: /* @__PURE__ */ jsxDEV23(ChevronDown, { className: "h-4 w-4 opacity-50" }, void 0, !1, {
         fileName: "app/components/ui/select.tsx",
         lineNumber: 27,
         columnNumber: 7
@@ -1863,7 +1744,7 @@ var SelectValue = SelectPrimitive.Value, SelectTrigger = React9.forwardRef(({ cl
   this
 ));
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
-var SelectScrollUpButton = React9.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV21(
+var SelectScrollUpButton = React11.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV23(
   SelectPrimitive.ScrollUpButton,
   {
     ref,
@@ -1872,7 +1753,7 @@ var SelectScrollUpButton = React9.forwardRef(({ className, ...props }, ref) => /
       className
     ),
     ...props,
-    children: /* @__PURE__ */ jsxDEV21(ChevronUp, { className: "h-4 w-4" }, void 0, !1, {
+    children: /* @__PURE__ */ jsxDEV23(ChevronUp, { className: "h-4 w-4" }, void 0, !1, {
       fileName: "app/components/ui/select.tsx",
       lineNumber: 45,
       columnNumber: 5
@@ -1888,7 +1769,7 @@ var SelectScrollUpButton = React9.forwardRef(({ className, ...props }, ref) => /
   this
 ));
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
-var SelectScrollDownButton = React9.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV21(
+var SelectScrollDownButton = React11.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV23(
   SelectPrimitive.ScrollDownButton,
   {
     ref,
@@ -1897,7 +1778,7 @@ var SelectScrollDownButton = React9.forwardRef(({ className, ...props }, ref) =>
       className
     ),
     ...props,
-    children: /* @__PURE__ */ jsxDEV21(ChevronDown, { className: "h-4 w-4" }, void 0, !1, {
+    children: /* @__PURE__ */ jsxDEV23(ChevronDown, { className: "h-4 w-4" }, void 0, !1, {
       fileName: "app/components/ui/select.tsx",
       lineNumber: 62,
       columnNumber: 5
@@ -1913,7 +1794,7 @@ var SelectScrollDownButton = React9.forwardRef(({ className, ...props }, ref) =>
   this
 ));
 SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
-var SelectContent = React9.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsxDEV21(SelectPrimitive.Portal, { children: /* @__PURE__ */ jsxDEV21(
+var SelectContent = React11.forwardRef(({ className, children, position = "popper", ...props }, ref) => /* @__PURE__ */ jsxDEV23(SelectPrimitive.Portal, { children: /* @__PURE__ */ jsxDEV23(
   SelectPrimitive.Content,
   {
     ref,
@@ -1925,12 +1806,12 @@ var SelectContent = React9.forwardRef(({ className, children, position = "popper
     position,
     ...props,
     children: [
-      /* @__PURE__ */ jsxDEV21(SelectScrollUpButton, {}, void 0, !1, {
+      /* @__PURE__ */ jsxDEV23(SelectScrollUpButton, {}, void 0, !1, {
         fileName: "app/components/ui/select.tsx",
         lineNumber: 84,
         columnNumber: 7
       }, this),
-      /* @__PURE__ */ jsxDEV21(
+      /* @__PURE__ */ jsxDEV23(
         SelectPrimitive.Viewport,
         {
           className: cn(
@@ -1948,7 +1829,7 @@ var SelectContent = React9.forwardRef(({ className, children, position = "popper
         },
         this
       ),
-      /* @__PURE__ */ jsxDEV21(SelectScrollDownButton, {}, void 0, !1, {
+      /* @__PURE__ */ jsxDEV23(SelectScrollDownButton, {}, void 0, !1, {
         fileName: "app/components/ui/select.tsx",
         lineNumber: 94,
         columnNumber: 7
@@ -1969,7 +1850,7 @@ var SelectContent = React9.forwardRef(({ className, children, position = "popper
   columnNumber: 3
 }, this));
 SelectContent.displayName = SelectPrimitive.Content.displayName;
-var SelectLabel = React9.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV21(
+var SelectLabel = React11.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV23(
   SelectPrimitive.Label,
   {
     ref,
@@ -1986,7 +1867,7 @@ var SelectLabel = React9.forwardRef(({ className, ...props }, ref) => /* @__PURE
   this
 ));
 SelectLabel.displayName = SelectPrimitive.Label.displayName;
-var SelectItem = React9.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsxDEV21(
+var SelectItem = React11.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ jsxDEV23(
   SelectPrimitive.Item,
   {
     ref,
@@ -1996,7 +1877,7 @@ var SelectItem = React9.forwardRef(({ className, children, ...props }, ref) => /
     ),
     ...props,
     children: [
-      /* @__PURE__ */ jsxDEV21("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ jsxDEV21(SelectPrimitive.ItemIndicator, { children: /* @__PURE__ */ jsxDEV21(Check2, { className: "h-4 w-4" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV23("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ jsxDEV23(SelectPrimitive.ItemIndicator, { children: /* @__PURE__ */ jsxDEV23(Check2, { className: "h-4 w-4" }, void 0, !1, {
         fileName: "app/components/ui/select.tsx",
         lineNumber: 126,
         columnNumber: 9
@@ -2009,7 +1890,7 @@ var SelectItem = React9.forwardRef(({ className, children, ...props }, ref) => /
         lineNumber: 124,
         columnNumber: 5
       }, this),
-      /* @__PURE__ */ jsxDEV21(SelectPrimitive.ItemText, { children }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV23(SelectPrimitive.ItemText, { children }, void 0, !1, {
         fileName: "app/components/ui/select.tsx",
         lineNumber: 130,
         columnNumber: 5
@@ -2026,7 +1907,7 @@ var SelectItem = React9.forwardRef(({ className, children, ...props }, ref) => /
   this
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;
-var SelectSeparator = React9.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV21(
+var SelectSeparator = React11.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV23(
   SelectPrimitive.Separator,
   {
     ref,
@@ -2045,10 +1926,10 @@ var SelectSeparator = React9.forwardRef(({ className, ...props }, ref) => /* @__
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
 // app/components/ui/textarea.tsx
-import * as React10 from "react";
-import { jsxDEV as jsxDEV22 } from "react/jsx-dev-runtime";
-var Textarea = React10.forwardRef(
-  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV22(
+import * as React12 from "react";
+import { jsxDEV as jsxDEV24 } from "react/jsx-dev-runtime";
+var Textarea = React12.forwardRef(
+  ({ className, ...props }, ref) => /* @__PURE__ */ jsxDEV24(
     "textarea",
     {
       className: cn(
@@ -2071,20 +1952,19 @@ var Textarea = React10.forwardRef(
 Textarea.displayName = "Textarea";
 
 // app/components/OrderForm.tsx
-import { jsxDEV as jsxDEV23 } from "react/jsx-dev-runtime";
-var orderSchema = z5.object({
-  referenceId: z5.string().max(200),
-  memo: z5.string().max(120).optional(),
-  npi: z5.string().max(40),
-  licenseState: z5.string().max(2),
-  lastName: z5.string().max(30),
-  firstName: z5.string().max(30),
-  dateOfBirth: z5.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  gender: z5.enum(["m", "f", "a", "u"]),
-  drugName: z5.string().max(254),
-  quantity: z5.string().max(45),
-  directions: z5.string().max(65535).optional()
-  // Add other fields as needed
+import { jsxDEV as jsxDEV25 } from "react/jsx-dev-runtime";
+var orderSchema = z3.object({
+  referenceId: z3.string().max(200),
+  memo: z3.string().max(120).optional(),
+  npi: z3.string().max(40),
+  licenseState: z3.string().max(2),
+  lastName: z3.string().max(30),
+  firstName: z3.string().max(30),
+  dateOfBirth: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  gender: z3.enum(["m", "f", "a", "u"]),
+  drugName: z3.string().max(254),
+  quantity: z3.string().max(45),
+  directions: z3.string().max(65535).optional()
 });
 function OrderForm() {
   let {
@@ -2094,8 +1974,8 @@ function OrderForm() {
     formState: { errors }
   } = useForm3({
     resolver: zodResolver3(orderSchema)
-  });
-  return /* @__PURE__ */ jsxDEV23("form", { className: "space-y-4", onSubmit: handleSubmit((data) => {
+  }), [isPending, startTransition] = useTransition();
+  return /* @__PURE__ */ jsxDEV25("form", { className: "space-y-4", onSubmit: handleSubmit((data) => {
     fetch("/api/post-order", {
       method: "post",
       body: JSON.stringify(data),
@@ -2104,139 +1984,139 @@ function OrderForm() {
       }
     });
   }), children: [
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "referenceId", className: "block text-sm font-medium text-gray-700", children: "Message ID:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "referenceId", className: "block text-sm font-medium text-gray-700", children: "Message ID:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 50,
+        lineNumber: 51,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "referenceId", ...register("referenceId"), placeholder: "Reference ID" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "referenceId", ...register("referenceId"), placeholder: "Reference ID" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 53,
+        lineNumber: 54,
         columnNumber: 9
       }, this),
-      errors.referenceId && typeof errors.referenceId.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.referenceId.message }, void 0, !1, {
+      errors.referenceId && typeof errors.referenceId.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.referenceId.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 55,
+        lineNumber: 56,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 49,
+      lineNumber: 50,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "memo", className: "block text-sm font-medium text-gray-700", children: "Memo:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "memo", className: "block text-sm font-medium text-gray-700", children: "Memo:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 59,
+        lineNumber: 60,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "memo", ...register("memo"), placeholder: "Memo" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "memo", ...register("memo"), placeholder: "Memo" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 62,
+        lineNumber: 63,
         columnNumber: 9
       }, this),
-      errors.memo && typeof errors.memo.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.memo.message }, void 0, !1, {
+      errors.memo && typeof errors.memo.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.memo.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 64,
+        lineNumber: 65,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 58,
+      lineNumber: 59,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "npi", className: "block text-sm font-medium text-gray-700", children: "NPI:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "npi", className: "block text-sm font-medium text-gray-700", children: "NPI:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 68,
+        lineNumber: 69,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "npi", ...register("npi"), placeholder: "NPI" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "npi", ...register("npi"), placeholder: "NPI" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 71,
+        lineNumber: 72,
         columnNumber: 9
       }, this),
-      errors.npi && typeof errors.npi.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.npi.message }, void 0, !1, {
+      errors.npi && typeof errors.npi.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.npi.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 73,
+        lineNumber: 74,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 67,
+      lineNumber: 68,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "licenseState", className: "block text-sm font-medium text-gray-700", children: "License State:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "licenseState", className: "block text-sm font-medium text-gray-700", children: "License State:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 77,
+        lineNumber: 78,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "licenseState", ...register("licenseState"), placeholder: "License State" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "licenseState", ...register("licenseState"), placeholder: "License State" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 80,
+        lineNumber: 81,
         columnNumber: 9
       }, this),
-      errors.licenseState && typeof errors.licenseState.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.licenseState.message }, void 0, !1, {
+      errors.licenseState && typeof errors.licenseState.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.licenseState.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 82,
+        lineNumber: 83,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 76,
+      lineNumber: 77,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "lastName", className: "block text-sm font-medium text-gray-700", children: "Last Name:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "lastName", className: "block text-sm font-medium text-gray-700", children: "Last Name:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 86,
+        lineNumber: 87,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "lastName", ...register("lastName"), placeholder: "Last Name" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "lastName", ...register("lastName"), placeholder: "Last Name" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 89,
+        lineNumber: 90,
         columnNumber: 9
       }, this),
-      errors.lastName && typeof errors.lastName.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.lastName.message }, void 0, !1, {
+      errors.lastName && typeof errors.lastName.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.lastName.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 91,
+        lineNumber: 92,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 85,
+      lineNumber: 86,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "firstName", className: "block text-sm font-medium text-gray-700", children: "First Name:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "firstName", className: "block text-sm font-medium text-gray-700", children: "First Name:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 95,
+        lineNumber: 96,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "firstName", ...register("firstName"), placeholder: "First Name" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "firstName", ...register("firstName"), placeholder: "First Name" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 98,
+        lineNumber: 99,
         columnNumber: 9
       }, this),
-      errors.firstName && typeof errors.firstName.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.firstName.message }, void 0, !1, {
+      errors.firstName && typeof errors.firstName.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.firstName.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 100,
+        lineNumber: 101,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 94,
+      lineNumber: 95,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { className: "block text-sm font-medium text-gray-700", children: "Date of Birth:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { className: "block text-sm font-medium text-gray-700", children: "Date of Birth:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 104,
+        lineNumber: 105,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(
+      /* @__PURE__ */ jsxDEV25(
         DatePicker,
         {
           onDateChange: (date) => {
@@ -2247,163 +2127,163 @@ function OrderForm() {
         !1,
         {
           fileName: "app/components/OrderForm.tsx",
-          lineNumber: 105,
+          lineNumber: 106,
           columnNumber: 9
         },
         this
       ),
-      errors.dateOfBirth && typeof errors.dateOfBirth.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.dateOfBirth.message }, void 0, !1, {
+      errors.dateOfBirth && typeof errors.dateOfBirth.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.dateOfBirth.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 113,
+        lineNumber: 114,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 103,
+      lineNumber: 104,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "gender", className: "block text-sm font-medium text-gray-700", children: "Gender:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "gender", className: "block text-sm font-medium text-gray-700", children: "Gender:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 117,
+        lineNumber: 118,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Select, { ...register("gender"), children: [
-        /* @__PURE__ */ jsxDEV23(SelectTrigger, { children: /* @__PURE__ */ jsxDEV23(SelectValue, { placeholder: "Select Gender" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Select, { ...register("gender"), children: [
+        /* @__PURE__ */ jsxDEV25(SelectTrigger, { children: /* @__PURE__ */ jsxDEV25(SelectValue, { placeholder: "Select Gender" }, void 0, !1, {
           fileName: "app/components/OrderForm.tsx",
-          lineNumber: 122,
+          lineNumber: 123,
           columnNumber: 13
         }, this) }, void 0, !1, {
           fileName: "app/components/OrderForm.tsx",
-          lineNumber: 121,
+          lineNumber: 122,
           columnNumber: 11
         }, this),
-        /* @__PURE__ */ jsxDEV23(SelectContent, { children: [
-          /* @__PURE__ */ jsxDEV23(SelectItem, { value: "m", children: "Male" }, void 0, !1, {
-            fileName: "app/components/OrderForm.tsx",
-            lineNumber: 125,
-            columnNumber: 13
-          }, this),
-          /* @__PURE__ */ jsxDEV23(SelectItem, { value: "f", children: "Female" }, void 0, !1, {
+        /* @__PURE__ */ jsxDEV25(SelectContent, { children: [
+          /* @__PURE__ */ jsxDEV25(SelectItem, { value: "m", children: "Male" }, void 0, !1, {
             fileName: "app/components/OrderForm.tsx",
             lineNumber: 126,
             columnNumber: 13
           }, this),
-          /* @__PURE__ */ jsxDEV23(SelectItem, { value: "a", children: "Animal" }, void 0, !1, {
+          /* @__PURE__ */ jsxDEV25(SelectItem, { value: "f", children: "Female" }, void 0, !1, {
             fileName: "app/components/OrderForm.tsx",
             lineNumber: 127,
             columnNumber: 13
           }, this),
-          /* @__PURE__ */ jsxDEV23(SelectItem, { value: "u", children: "Unknown" }, void 0, !1, {
+          /* @__PURE__ */ jsxDEV25(SelectItem, { value: "a", children: "Animal" }, void 0, !1, {
             fileName: "app/components/OrderForm.tsx",
             lineNumber: 128,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV25(SelectItem, { value: "u", children: "Unknown" }, void 0, !1, {
+            fileName: "app/components/OrderForm.tsx",
+            lineNumber: 129,
             columnNumber: 13
           }, this)
         ] }, void 0, !0, {
           fileName: "app/components/OrderForm.tsx",
-          lineNumber: 124,
+          lineNumber: 125,
           columnNumber: 11
         }, this)
       ] }, void 0, !0, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 120,
+        lineNumber: 121,
         columnNumber: 9
       }, this),
-      errors.gender && typeof errors.gender.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.gender.message }, void 0, !1, {
+      errors.gender && typeof errors.gender.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.gender.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 132,
+        lineNumber: 133,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 116,
+      lineNumber: 117,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "drugName", className: "block text-sm font-medium text-gray-700", children: "Drug Name:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "drugName", className: "block text-sm font-medium text-gray-700", children: "Drug Name:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 136,
+        lineNumber: 137,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "drugName", ...register("drugName"), placeholder: "Drug Name" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "drugName", ...register("drugName"), placeholder: "Drug Name" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 139,
+        lineNumber: 140,
         columnNumber: 9
       }, this),
-      errors.drugName && typeof errors.drugName.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.drugName.message }, void 0, !1, {
+      errors.drugName && typeof errors.drugName.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.drugName.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 141,
+        lineNumber: 142,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 135,
+      lineNumber: 136,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "quantity", className: "block text-sm font-medium text-gray-700", children: "Quantity:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "quantity", className: "block text-sm font-medium text-gray-700", children: "Quantity:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 145,
+        lineNumber: 146,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Input, { type: "text", id: "quantity", ...register("quantity"), placeholder: "Quantity" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Input, { type: "text", id: "quantity", ...register("quantity"), placeholder: "Quantity" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 148,
+        lineNumber: 149,
         columnNumber: 9
       }, this),
-      errors.quantity && typeof errors.quantity.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.quantity.message }, void 0, !1, {
+      errors.quantity && typeof errors.quantity.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.quantity.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 150,
+        lineNumber: 151,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 144,
+      lineNumber: 145,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23("div", { children: [
-      /* @__PURE__ */ jsxDEV23("label", { htmlFor: "directions", className: "block text-sm font-medium text-gray-700", children: "Directions:" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25("div", { children: [
+      /* @__PURE__ */ jsxDEV25("label", { htmlFor: "directions", className: "block text-sm font-medium text-gray-700", children: "Directions:" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 154,
+        lineNumber: 155,
         columnNumber: 9
       }, this),
-      /* @__PURE__ */ jsxDEV23(Textarea, { id: "directions", ...register("directions"), placeholder: "Directions" }, void 0, !1, {
+      /* @__PURE__ */ jsxDEV25(Textarea, { id: "directions", ...register("directions"), placeholder: "Directions" }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 157,
+        lineNumber: 158,
         columnNumber: 9
       }, this),
-      errors.directions && typeof errors.directions.message == "string" && /* @__PURE__ */ jsxDEV23("span", { className: "text-red-600", children: errors.directions.message }, void 0, !1, {
+      errors.directions && typeof errors.directions.message == "string" && /* @__PURE__ */ jsxDEV25("span", { className: "text-red-600", children: errors.directions.message }, void 0, !1, {
         fileName: "app/components/OrderForm.tsx",
-        lineNumber: 159,
+        lineNumber: 160,
         columnNumber: 11
       }, this)
     ] }, void 0, !0, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 153,
+      lineNumber: 154,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV23(Button, { type: "submit", children: "Submit Order" }, void 0, !1, {
+    /* @__PURE__ */ jsxDEV25(Button, { type: "submit", disabled: isPending, children: isPending ? "Submitting..." : "Submit Order" }, void 0, !1, {
       fileName: "app/components/OrderForm.tsx",
-      lineNumber: 163,
+      lineNumber: 164,
       columnNumber: 7
     }, this)
   ] }, void 0, !0, {
     fileName: "app/components/OrderForm.tsx",
-    lineNumber: 48,
+    lineNumber: 49,
     columnNumber: 5
   }, this);
 }
 
 // app/routes/orders.create.tsx
-import { jsxDEV as jsxDEV24 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV26 } from "react/jsx-dev-runtime";
 function OrdersCreate() {
-  return /* @__PURE__ */ jsxDEV24(Card, { className: "m-auto max-w-lg p-4", children: [
-    /* @__PURE__ */ jsxDEV24("h1", { className: "text-neutral-600 font-bold text-sm mb-4", children: "Create a New Order" }, void 0, !1, {
+  return /* @__PURE__ */ jsxDEV26(Card, { className: "m-auto max-w-lg p-4", children: [
+    /* @__PURE__ */ jsxDEV26("h1", { className: "text-neutral-600 font-bold text-sm mb-4", children: "Create a New Order" }, void 0, !1, {
       fileName: "app/routes/orders.create.tsx",
       lineNumber: 9,
       columnNumber: 7
     }, this),
-    /* @__PURE__ */ jsxDEV24(OrderForm, {}, void 0, !1, {
+    /* @__PURE__ */ jsxDEV26(OrderForm, {}, void 0, !1, {
       fileName: "app/routes/orders.create.tsx",
       lineNumber: 10,
       columnNumber: 7
@@ -2418,20 +2298,14 @@ function OrdersCreate() {
 // app/routes/api.push.tsx
 var api_push_exports = {};
 __export(api_push_exports, {
-  action: () => action5
+  action: () => action5,
+  loader: () => loader2
 });
 import { json as json4 } from "@remix-run/node";
-
-// app/services/authenticate.server.ts
-function authenticate(authHeader) {
-  let encodedCredentials = authHeader.split(" ")[1], decodedCredentials = Buffer.from(encodedCredentials, "base64").toString("ascii"), [username, password] = decodedCredentials.split(":");
-  return username === "your-username" && password === "your-password";
-}
-
-// app/routes/api.push.tsx
-var action5 = async ({ request }) => {
-  let authHeader = request.headers.get("Authorization");
-  if (!authHeader || !authenticate(authHeader))
+import auth from "basic-auth";
+var loader2 = async ({ request }) => json4({ message: "This endpoint accepts POST requests only." }), action5 = async ({ request }) => {
+  let credentials = authenticate(request);
+  if (console.log("Credentials: ", credentials), !credentials || credentials.name !== process.env.LIFEFILE_USERNAME || credentials.pass !== process.env.LIFEFILE_PASSWORD)
     return new Response("Unauthorized", { status: 401 });
   let contentType = request.headers.get("Content-Type"), data;
   if (contentType === "application/json")
@@ -2442,17 +2316,25 @@ var action5 = async ({ request }) => {
   } else
     return new Response("Unsupported Media Type", { status: 415 });
   try {
-    return console.log(data), json4({ message: "Data received successfully" }, { status: 200 });
+    return console.log("Payload Data: ", data), json4({ message: "Data received successfully" }, { status: 200 });
   } catch {
     return new Response("Server Error", { status: 500 });
   }
 };
+function authenticate(request) {
+  let authorizationHeader = request.headers.get("Authorization");
+  return authorizationHeader ? auth({
+    headers: {
+      authorization: authorizationHeader
+    }
+  }) : null;
+}
 
 // app/routes/_index.tsx
 var index_exports = {};
 __export(index_exports, {
   default: () => Index,
-  loader: () => loader2
+  loader: () => loader3
 });
 import { redirect as redirect2 } from "@remix-run/router";
 
@@ -2460,12 +2342,12 @@ import { redirect as redirect2 } from "@remix-run/router";
 var LANDING_PAGE = "/orders/create", hoursOptions = Array.from({ length: 12 }, (_, index) => (index + 1).toString());
 
 // app/routes/_index.tsx
-import { jsxDEV as jsxDEV25 } from "react/jsx-dev-runtime";
-async function loader2() {
+import { jsxDEV as jsxDEV27 } from "react/jsx-dev-runtime";
+async function loader3() {
   return redirect2(LANDING_PAGE);
 }
 function Index() {
-  return /* @__PURE__ */ jsxDEV25("main", { children: /* @__PURE__ */ jsxDEV25("p", { children: "Are you supposed to be here?" }, void 0, !1, {
+  return /* @__PURE__ */ jsxDEV27("main", { children: /* @__PURE__ */ jsxDEV27("p", { children: "Are you supposed to be here?" }, void 0, !1, {
     fileName: "app/routes/_index.tsx",
     lineNumber: 13,
     columnNumber: 7
@@ -2483,9 +2365,9 @@ __export(orders_exports, {
 });
 import { Outlet as Outlet2 } from "@remix-run/react";
 import { AnimatePresence } from "framer-motion";
-import { jsxDEV as jsxDEV26 } from "react/jsx-dev-runtime";
+import { jsxDEV as jsxDEV28 } from "react/jsx-dev-runtime";
 function Orders() {
-  return /* @__PURE__ */ jsxDEV26("div", { className: "grid gap-6 h-full py-2", children: /* @__PURE__ */ jsxDEV26(AnimatePresence, { children: /* @__PURE__ */ jsxDEV26(Outlet2, {}, void 0, !1, {
+  return /* @__PURE__ */ jsxDEV28("div", { className: "grid gap-6 h-full py-2", children: /* @__PURE__ */ jsxDEV28(AnimatePresence, { children: /* @__PURE__ */ jsxDEV28(Outlet2, {}, void 0, !1, {
     fileName: "app/routes/orders.tsx",
     lineNumber: 9,
     columnNumber: 9
@@ -2501,7 +2383,7 @@ function Orders() {
 }
 
 // server-assets-manifest:@remix-run/dev/assets-manifest
-var assets_manifest_default = { entry: { module: "/build/entry.client-ACYXZ4G2.js", imports: ["/build/_shared/chunk-O4BRYNJ4.js", "/build/_shared/chunk-5O76QR7Y.js", "/build/_shared/chunk-U4FRFQSK.js", "/build/_shared/chunk-RMI6ZCVV.js", "/build/_shared/chunk-XGOTYLZ5.js", "/build/_shared/chunk-7M6SC7J5.js", "/build/_shared/chunk-WP7EWCBT.js", "/build/_shared/chunk-UWV35TSL.js", "/build/_shared/chunk-PNG5AS42.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-SBIBGEH3.js", imports: ["/build/_shared/chunk-XHCA6GOX.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/_index": { id: "routes/_index", parentId: "root", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/_index-M6MPC732.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/action.set-theme": { id: "routes/action.set-theme", parentId: "root", path: "action/set-theme", index: void 0, caseSensitive: void 0, module: "/build/routes/action.set-theme-JDBUG4AI.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.order-update-shipping": { id: "routes/api.order-update-shipping", parentId: "root", path: "api/order-update-shipping", index: void 0, caseSensitive: void 0, module: "/build/routes/api.order-update-shipping-OI3OILYE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.order-update-status": { id: "routes/api.order-update-status", parentId: "root", path: "api/order-update-status", index: void 0, caseSensitive: void 0, module: "/build/routes/api.order-update-status-PZCUY5NR.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.post-order": { id: "routes/api.post-order", parentId: "root", path: "api/post-order", index: void 0, caseSensitive: void 0, module: "/build/routes/api.post-order-4RHBJDVW.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.push": { id: "routes/api.push", parentId: "root", path: "api/push", index: void 0, caseSensitive: void 0, module: "/build/routes/api.push-33ECJXHS.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders": { id: "routes/orders", parentId: "root", path: "orders", index: void 0, caseSensitive: void 0, module: "/build/routes/orders-TL4L6OT4.js", imports: void 0, hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders._index": { id: "routes/orders._index", parentId: "routes/orders", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/orders._index-LKFXJMUZ.js", imports: void 0, hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders.create": { id: "routes/orders.create", parentId: "routes/orders", path: "create", index: void 0, caseSensitive: void 0, module: "/build/routes/orders.create-RTVLFBRM.js", imports: ["/build/_shared/chunk-XHCA6GOX.js", "/build/_shared/chunk-HNAIR35R.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders.update-shipping": { id: "routes/orders.update-shipping", parentId: "routes/orders", path: "update-shipping", index: void 0, caseSensitive: void 0, module: "/build/routes/orders.update-shipping-YNCOYKHA.js", imports: ["/build/_shared/chunk-HNAIR35R.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders.update-status": { id: "routes/orders.update-status", parentId: "routes/orders", path: "update-status", index: void 0, caseSensitive: void 0, module: "/build/routes/orders.update-status-VUEFJEZC.js", imports: ["/build/_shared/chunk-HNAIR35R.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 } }, version: "3d16106d", hmr: { runtime: "/build/_shared/chunk-WP7EWCBT.js", timestamp: 1720997303317 }, url: "/build/manifest-3D16106D.js" };
+var assets_manifest_default = { entry: { module: "/build/entry.client-MKDUCB36.js", imports: ["/build/_shared/chunk-O4BRYNJ4.js", "/build/_shared/chunk-ENWVF2EX.js", "/build/_shared/chunk-RMI6ZCVV.js", "/build/_shared/chunk-U4FRFQSK.js", "/build/_shared/chunk-XGOTYLZ5.js", "/build/_shared/chunk-7M6SC7J5.js", "/build/_shared/chunk-WP7EWCBT.js", "/build/_shared/chunk-UWV35TSL.js", "/build/_shared/chunk-PNG5AS42.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-W46DZ6UL.js", imports: ["/build/_shared/chunk-KZQBAT7J.js", "/build/_shared/chunk-NTQ5DAFN.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/_index": { id: "routes/_index", parentId: "root", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/_index-M6MPC732.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/action.set-theme": { id: "routes/action.set-theme", parentId: "root", path: "action/set-theme", index: void 0, caseSensitive: void 0, module: "/build/routes/action.set-theme-JDBUG4AI.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.order-update-shipping": { id: "routes/api.order-update-shipping", parentId: "root", path: "api/order-update-shipping", index: void 0, caseSensitive: void 0, module: "/build/routes/api.order-update-shipping-OI3OILYE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.order-update-status": { id: "routes/api.order-update-status", parentId: "root", path: "api/order-update-status", index: void 0, caseSensitive: void 0, module: "/build/routes/api.order-update-status-PZCUY5NR.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.post-order": { id: "routes/api.post-order", parentId: "root", path: "api/post-order", index: void 0, caseSensitive: void 0, module: "/build/routes/api.post-order-4RHBJDVW.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.push": { id: "routes/api.push", parentId: "root", path: "api/push", index: void 0, caseSensitive: void 0, module: "/build/routes/api.push-33ECJXHS.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders": { id: "routes/orders", parentId: "root", path: "orders", index: void 0, caseSensitive: void 0, module: "/build/routes/orders-GIYDO7TP.js", imports: void 0, hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders._index": { id: "routes/orders._index", parentId: "routes/orders", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/orders._index-LKFXJMUZ.js", imports: void 0, hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders.create": { id: "routes/orders.create", parentId: "routes/orders", path: "create", index: void 0, caseSensitive: void 0, module: "/build/routes/orders.create-GBMZAQN2.js", imports: ["/build/_shared/chunk-KZQBAT7J.js", "/build/_shared/chunk-NTQ5DAFN.js", "/build/_shared/chunk-HMWUSESS.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders.update-shipping": { id: "routes/orders.update-shipping", parentId: "routes/orders", path: "update-shipping", index: void 0, caseSensitive: void 0, module: "/build/routes/orders.update-shipping-OYAWWGKZ.js", imports: ["/build/_shared/chunk-NTQ5DAFN.js", "/build/_shared/chunk-LISCYTPG.js", "/build/_shared/chunk-HMWUSESS.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/orders.update-status": { id: "routes/orders.update-status", parentId: "routes/orders", path: "update-status", index: void 0, caseSensitive: void 0, module: "/build/routes/orders.update-status-BG5ZCMCX.js", imports: ["/build/_shared/chunk-LISCYTPG.js", "/build/_shared/chunk-HMWUSESS.js", "/build/_shared/chunk-XSUS2BTX.js", "/build/_shared/chunk-B43JI2TA.js"], hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 } }, version: "04aa7aab", hmr: { runtime: "/build/_shared/chunk-WP7EWCBT.js", timestamp: 1721239641454 }, url: "/build/manifest-04AA7AAB.js" };
 
 // server-entry-module:@remix-run/dev/server-build
 var mode = "development", assetsBuildDirectory = "public/build", future = { v3_fetcherPersist: !1, v3_relativeSplatPath: !1, v3_throwAbortReason: !1, unstable_singleFetch: !1, unstable_fogOfWar: !1 }, publicPath = "/build/", entry = { module: entry_server_exports }, routes = {

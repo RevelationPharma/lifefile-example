@@ -1,15 +1,10 @@
 // components/UpdateOrderStatusForm.jsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { BASE_API_URL } from "~/data/shared";
-
-const updateOrderStatusSchema = z.object({
-  orderId: z.number().int(),
-  status: z.string(),
-});
+import { API_HEADERS, BASE_API_URL } from "~/data/shared.server";
+import { updateOrderStatusSchema } from "~/routes/api.order-update-status";
 
 export default function UpdateOrderStatusForm() {
   const {
@@ -24,12 +19,7 @@ export default function UpdateOrderStatusForm() {
   const onSubmit = async (data: any) => {
     const response = await fetch(`${BASE_API_URL}/update-order-status`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Vendor-ID": "11324", // Replace with actual Vendor ID
-        "X-Location-ID": "110033", // Replace with actual Location ID
-        "X-API-Network-ID": "233582", // Replace with actual API Network ID
-      },
+      headers: { ...API_HEADERS },
       body: JSON.stringify(data),
     });
     const result = await response.json();

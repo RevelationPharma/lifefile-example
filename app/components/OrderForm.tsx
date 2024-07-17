@@ -1,5 +1,6 @@
 // components/OrderForm.jsx
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "~/components/ui/button";
@@ -20,7 +21,6 @@ const orderSchema = z.object({
   drugName: z.string().max(254),
   quantity: z.string().max(45),
   directions: z.string().max(65535).optional(),
-  // Add other fields as needed
 });
 
 export default function OrderForm() {
@@ -32,6 +32,7 @@ export default function OrderForm() {
   } = useForm({
     resolver: zodResolver(orderSchema),
   });
+  const [isPending, startTransition] = useTransition();
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const onSubmit = (data: any) => {
@@ -160,7 +161,9 @@ export default function OrderForm() {
         )}
       </div>
 
-      <Button type="submit">Submit Order</Button>
+      <Button type="submit" disabled={isPending}>
+        {isPending ? "Submitting..." : "Submit Order"}
+      </Button>
     </form>
   );
 }

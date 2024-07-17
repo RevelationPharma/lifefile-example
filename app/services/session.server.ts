@@ -2,7 +2,7 @@
 import { createCookieSessionStorage } from "@remix-run/node";
 import { redirect } from "@vercel/remix";
 import { createThemeSessionResolver } from "remix-themes";
-import { isProduction } from "~/data/shared";
+import { isProduction } from "~/data/shared.server";
 
 export const sessionStorage = createCookieSessionStorage({
   cookie: {

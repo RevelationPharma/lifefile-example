@@ -1,44 +1,26 @@
 // components/UpdateOrderShippingForm.jsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "~/components/ui/button";
+import { Form, FormControl, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { BASE_API_URL } from "~/data/shared";
-
-const updateOrderShippingSchema = z.object({
-  orderId: z.number().int(),
-  recipientType: z.enum(["clinic", "patient"]),
-  recipientLastName: z.string().max(30),
-  recipientFirstName: z.string().max(30),
-  recipientPhone: z.string().max(16),
-  recipientEmail: z.string().max(100),
-  addressLine1: z.string().max(60),
-  city: z.string().max(30),
-  state: z.string().max(2),
-  zipCode: z.string().max(10),
-  country: z.string().max(2),
-});
+import { API_HEADERS, BASE_API_URL } from "~/data/shared.server";
+import { updateOrderShippingSchema } from "~/routes/api.order-update-shipping";
 
 export default function UpdateOrderShippingForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const form = useForm({
     resolver: zodResolver(updateOrderShippingSchema),
   });
+  const {
+    register,
+    formState: { errors },
+  } = form;
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const onSubmit = async (data: any) => {
     const response = await fetch(`${BASE_API_URL}/update-order-shipping`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Vendor-ID": "11324", // Replace with actual Vendor ID
-        "X-Location-ID": "110033", // Replace with actual Location ID
-        "X-API-Network-ID": "233582", // Replace with actual API Network ID
-      },
+      headers: { ...API_HEADERS },
       body: JSON.stringify(data),
     });
     const result = await response.json();
@@ -50,120 +32,114 @@ export default function UpdateOrderShippingForm() {
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="orderId" className="block text-sm font-medium text-gray-700">
-          Order ID:
-        </label>
-        <Input type="number" id="orderId" {...register("orderId", { valueAsNumber: true })} placeholder="Order ID" />
-        {errors.orderId && typeof errors.orderId.message === "string" && (
-          <span className="text-red-600">{errors.orderId.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="recipientType" className="block text-sm font-medium text-gray-700">
-          Recipient Type:
-        </label>
-        <select id="recipientType" {...register("recipientType")} className="input">
-          <option value="clinic">Clinic</option>
-          <option value="patient">Patient</option>
-        </select>
-        {errors.recipientType && typeof errors.recipientType.message === "string" && (
-          <span className="text-red-600">{errors.recipientType.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="recipientLastName" className="block text-sm font-medium text-gray-700">
-          Recipient Last Name:
-        </label>
-        <Input
-          type="text"
-          id="recipientLastName"
-          {...register("recipientLastName")}
-          placeholder="Recipient Last Name"
-        />
-        {errors.recipientLastName && typeof errors.recipientLastName.message === "string" && (
-          <span className="text-red-600">{errors.recipientLastName.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="recipientFirstName" className="block text-sm font-medium text-gray-700">
-          Recipient First Name:
-        </label>
-        <Input
-          type="text"
-          id="recipientFirstName"
-          {...register("recipientFirstName")}
-          placeholder="Recipient First Name"
-        />
-        {errors.recipientFirstName && typeof errors.recipientFirstName.message === "string" && (
-          <span className="text-red-600">{errors.recipientFirstName.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="recipientPhone" className="block text-sm font-medium text-gray-700">
-          Recipient Phone:
-        </label>
-        <Input type="text" id="recipientPhone" {...register("recipientPhone")} placeholder="Recipient Phone" />
-        {errors.recipientPhone && typeof errors.recipientPhone.message === "string" && (
-          <span className="text-red-600">{errors.recipientPhone.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="recipientEmail" className="block text-sm font-medium text-gray-700">
-          Recipient Email:
-        </label>
-        <Input type="email" id="recipientEmail" {...register("recipientEmail")} placeholder="Recipient Email" />
-        {errors.recipientEmail && typeof errors.recipientEmail.message === "string" && (
-          <span className="text-red-600">{errors.recipientEmail.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700">
-          Address Line 1:
-        </label>
-        <Input type="text" id="addressLine1" {...register("addressLine1")} placeholder="Address Line 1" />
-        {errors.addressLine1 && typeof errors.addressLine1.message === "string" && (
-          <span className="text-red-600">{errors.addressLine1.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-          City:
-        </label>
-        <Input type="text" id="city" {...register("city")} placeholder="City" />
-        {errors.city && typeof errors.city.message === "string" && (
-          <span className="text-red-600">{errors.city.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-          State:
-        </label>
-        <Input type="text" id="state" {...register("state")} placeholder="State" />
-        {errors.state && typeof errors.state.message === "string" && (
-          <span className="text-red-600">{errors.state.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700">
-          Zip Code:
-        </label>
-        <Input type="text" id="zipCode" {...register("zipCode")} placeholder="Zip Code" />
-        {errors.zipCode && typeof errors.zipCode.message === "string" && (
-          <span className="text-red-600">{errors.zipCode.message}</span>
-        )}
-      </div>
-      <div>
-        <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-          Country:
-        </label>
-        <Input type="text" id="country" {...register("country")} placeholder="Country" />
-        {errors.country && typeof errors.country.message === "string" && (
-          <span className="text-red-600">{errors.country.message}</span>
-        )}
-      </div>
+    <Form {...form}>
+      <FormItem>
+        <FormLabel htmlFor="orderId">Order ID:</FormLabel>
+        <FormControl>
+          <Input type="number" id="orderId" {...register("orderId", { valueAsNumber: true })} placeholder="Order ID" />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="recipientType">Recipient Type:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Select {...register("recipientType")}>*/}
+      {/*      <SelectTrigger>*/}
+      {/*        <SelectValue placeholder="Select type" />*/}
+      {/*      </SelectTrigger>*/}
+      {/*      <SelectContent>*/}
+      {/*        <SelectItem value="clinic">Clinic</SelectItem>*/}
+      {/*        <SelectItem value="patient">Patient</SelectItem>*/}
+      {/*      </SelectContent>*/}
+      {/*    </Select>*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.recipientType && <FormMessage>{errors.recipientType.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="recipientLastName">Recipient Last Name:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input*/}
+      {/*      type="text"*/}
+      {/*      id="recipientLastName"*/}
+      {/*      {...register("recipientLastName")}*/}
+      {/*      placeholder="Recipient Last Name"*/}
+      {/*    />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.recipientLastName && <FormMessage>{errors.recipientLastName.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="recipientFirstName">Recipient First Name:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input*/}
+      {/*      type="text"*/}
+      {/*      id="recipientFirstName"*/}
+      {/*      {...register("recipientFirstName")}*/}
+      {/*      placeholder="Recipient First Name"*/}
+      {/*    />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.recipientFirstName && <FormMessage>{errors.recipientFirstName.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="recipientPhone">Recipient Phone:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input type="text" id="recipientPhone" {...register("recipientPhone")} placeholder="Recipient Phone" />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.recipientPhone && <FormMessage>{errors.recipientPhone.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="recipientEmail">Recipient Email:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input type="email" id="recipientEmail" {...register("recipientEmail")} placeholder="Recipient Email" />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.recipientEmail && <FormMessage>{errors.recipientEmail.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="addressLine1">Address Line 1:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input type="text" id="addressLine1" {...register("addressLine1")} placeholder="Address Line 1" />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.addressLine1 && <FormMessage>{errors.addressLine1.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="city">City:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input type="text" id="city" {...register("city")} placeholder="City" />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.city && <FormMessage>{errors.city.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="state">State:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input type="text" id="state" {...register("state")} placeholder="State" />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.state && <FormMessage>{errors.state.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="zipCode">Zip Code:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input type="text" id="zipCode" {...register("zipCode")} placeholder="Zip Code" />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.zipCode && <FormMessage>{errors.zipCode.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
+      {/*<FormItem>*/}
+      {/*  <FormLabel htmlFor="country">Country:</FormLabel>*/}
+      {/*  <FormControl>*/}
+      {/*    <Input type="text" id="country" {...register("country")} placeholder="Country" />*/}
+      {/*  </FormControl>*/}
+      {/*  {errors.country && <FormMessage>{errors.country.message}</FormMessage>}*/}
+      {/*</FormItem>*/}
+
       <Button type="submit">Update Shipping</Button>
-    </form>
+    </Form>
   );
 }
