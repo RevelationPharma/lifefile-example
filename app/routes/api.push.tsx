@@ -10,9 +10,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export const action: ActionFunction = async ({ request }: ActionFunctionArgs) => {
-  // console.log("Request: ", request.headers.get("Authorization"));
   const credentials = authenticate(request);
-  console.log("Credentials: ", credentials);
 
   if (
     !credentials ||
@@ -35,6 +33,7 @@ export const action: ActionFunction = async ({ request }: ActionFunctionArgs) =>
   }
 
   try {
+    // TODO: Do something with the data
     console.log("Payload Data: ", data);
 
     return json({ message: "Data received successfully" }, { status: 200 });
