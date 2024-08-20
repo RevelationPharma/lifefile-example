@@ -13,6 +13,6 @@ update order status, update shipping status, and retrieve push data.
 
 - `app/data/shared.server.ts` - This is where the necessary environment variables are checked.
 - `app/routes/orders.create.tsx` - This is where the order creation logic is.
+- `app/routes/orders.update-status.tsx` - This is where the order status update logic is.
+- `app/routes/orders.update-shipping.tsx` - This is where the shipping status update logic is.
 - `app/routes/api.push.tsx` - This is where the push data retrieval logic is.
-- `app/routes/api.order-update-status.ts` - This is where the order status update logic is.
-- `app/routes/api.order-update-shipping.ts` - This is where the shipping status update logic is.
