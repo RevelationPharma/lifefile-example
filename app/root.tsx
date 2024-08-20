@@ -7,7 +7,6 @@ import { clsx } from "clsx";
 import { useEffect } from "react";
 import { PreventFlashOnWrongTheme, ThemeProvider, useTheme } from "remix-themes";
 import { Header } from "~/components/header";
-import { Toaster } from "~/components/ui/toaster";
 import { themeSessionResolver } from "~/services/session.server";
 import mainCss from "~/styles/main.css";
 import tailwindStyles from "~/styles/tailwind.css";
@@ -92,7 +91,6 @@ export function App() {
       <body>
         <Header />
         <Outlet />
-        <Toaster />
         <ScrollRestoration />
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Suggested by RemixJS Docs

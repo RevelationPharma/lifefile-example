@@ -148,11 +148,11 @@ export default function OrdersUpdateShipping() {
 
   return (
     <Card className={"m-auto max-w-lg p-4"}>
-      <h1 className={"text-neutral-600 font-bold text-sm mb-4"}>Update Order Shipping</h1>
+      <h1 className={"text-neutral-600 dark:text-neutral-200 font-bold text-sm mb-4"}>Update Order Shipping</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="orderId" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="orderId" className="block text-sm font-medium">
             Order ID:
           </label>
           <Input id="orderId" {...register("orderId")} placeholder="Order ID" />
@@ -160,7 +160,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="recipientType" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="recipientType" className="block text-sm font-medium">
             Recipient Type:
           </label>
           <Controller
@@ -185,7 +185,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="recipientLastName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="recipientLastName" className="block text-sm font-medium">
             Recipient Last Name:
           </label>
           <Input type="text" id="recipientLastName" {...register("recipientLastName")} placeholder="Last Name" />
@@ -193,7 +193,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="recipientFirstName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="recipientFirstName" className="block text-sm font-medium">
             Recipient First Name:
           </label>
           <Input type="text" id="recipientFirstName" {...register("recipientFirstName")} placeholder="First Name" />
@@ -201,7 +201,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="recipientPhone" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="recipientPhone" className="block text-sm font-medium">
             Recipient Phone:
           </label>
           <Input type="tel" id="recipientPhone" {...register("recipientPhone")} placeholder="Phone Number" />
@@ -209,7 +209,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="recipientEmail" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="recipientEmail" className="block text-sm font-medium">
             Recipient Email:
           </label>
           <Input type="email" id="recipientEmail" {...register("recipientEmail")} placeholder="Email Address" />
@@ -217,7 +217,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="addressLine1" className="block text-sm font-medium">
             Address Line 1:
           </label>
           <Input type="text" id="addressLine1" {...register("addressLine1")} placeholder="Address Line 1" />
@@ -225,7 +225,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="city" className="block text-sm font-medium">
             City:
           </label>
           <Input type="text" id="city" {...register("city")} placeholder="City" />
@@ -233,7 +233,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="state" className="block text-sm font-medium">
             State:
           </label>
           <Input type="text" id="state" {...register("state")} placeholder="State (2 letters)" maxLength={2} />
@@ -241,7 +241,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="zipCode" className="block text-sm font-medium">
             Zip Code:
           </label>
           <Input type="text" id="zipCode" {...register("zipCode")} placeholder="Zip Code" />
@@ -249,7 +249,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="country" className="block text-sm font-medium">
             Country:
           </label>
           <Input type="text" id="country" {...register("country")} placeholder="Country (2 letters)" maxLength={2} />
@@ -257,7 +257,7 @@ export default function OrdersUpdateShipping() {
         </div>
 
         <div>
-          <label htmlFor="service" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="service" className="block text-sm font-medium">
             Service:
           </label>
 

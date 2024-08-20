@@ -238,10 +238,13 @@ export default function OrdersCreate() {
 
   return (
     <Card className="m-auto max-w-lg p-4">
-      <h1 className="text-neutral-600 font-bold text-sm mb-4">Create a New Order</h1>
+      <h1 className="text-neutral-600 dark:text-neutral-200 font-bold text-sm mb-4">Create a New Order</h1>
+
+      <div className={"mb-2 text-red-600"}>NOTE: The payload is currently hardcoded and not using this form.</div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="referenceId" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="referenceId" className="block text-sm font-medium">
             Reference ID*:
           </label>
           <Input type="text" id="referenceId" {...register("referenceId")} placeholder="Reference ID" />
@@ -250,7 +253,7 @@ export default function OrdersCreate() {
           )}
         </div>
         <div>
-          <label htmlFor="npi" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="npi" className="block text-sm font-medium">
             NPI*:
           </label>
           <Input type="text" id="npi" {...register("npi")} placeholder="NPI" />
@@ -259,7 +262,7 @@ export default function OrdersCreate() {
           )}
         </div>
         <div>
-          <label htmlFor="prescriberLastName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="prescriberLastName" className="block text-sm font-medium">
             Prescriber Last Name*:
           </label>
           <Input
@@ -273,7 +276,7 @@ export default function OrdersCreate() {
           )}
         </div>
         <div>
-          <label htmlFor="patientLastName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="patientLastName" className="block text-sm font-medium">
             Patient Last Name*:
           </label>
           <Input type="text" id="patientLastName" {...register("patientLastName")} placeholder="Patient Last Name" />
@@ -282,7 +285,7 @@ export default function OrdersCreate() {
           )}
         </div>
         <div>
-          <label htmlFor="patientFirstName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="patientFirstName" className="block text-sm font-medium">
             Patient First Name*:
           </label>
           <Input type="text" id="patientFirstName" {...register("patientFirstName")} placeholder="Patient First Name" />
@@ -291,7 +294,7 @@ export default function OrdersCreate() {
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Date of Birth*:</label>
+          <label className="block text-sm font-medium">Date of Birth*:</label>
 
           <Controller
             control={control}
@@ -316,7 +319,7 @@ export default function OrdersCreate() {
           </div>
         </div>
         <div>
-          <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="gender" className="block text-sm font-medium">
             Patient Gender*:
           </label>
           <Controller
@@ -346,7 +349,7 @@ export default function OrdersCreate() {
           )}
         </div>
         <div>
-          <label htmlFor="drugName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="drugName" className="block text-sm font-medium">
             Drug Name*:
           </label>
           <Input type="text" id="drugName" {...register("drugName")} placeholder="Drug Name" />

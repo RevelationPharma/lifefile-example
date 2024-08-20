@@ -99,11 +99,11 @@ export default function OrdersUpdateStatus() {
 
   return (
     <Card className={"m-auto max-w-lg p-4"}>
-      <h1 className={"text-neutral-600 font-bold text-sm mb-4"}>Update Order Status</h1>
+      <h1 className={"text-neutral-600 dark:text-neutral-200 font-bold text-sm mb-4"}>Update Order Status</h1>
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <label htmlFor="orderId" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="orderId" className="block text-sm font-medium">
             Order ID:
           </label>
           <Input id="orderId" {...register("orderId")} placeholder="Order ID" />
@@ -112,7 +112,7 @@ export default function OrdersUpdateStatus() {
           )}
         </div>
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="status" className="block text-sm font-medium">
             Status:
           </label>
           <Controller
