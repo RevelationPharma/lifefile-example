@@ -10,15 +10,23 @@ import { Calendar } from "~/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 
 export function DatePicker({
+  defaultDate,
   onDateChange,
 }: {
+  defaultDate?: Date;
   onDateChange: (date: Date | undefined) => void;
 }) {
-  const [date, setDate] = useState<Date>();
+  const fallBackDate = new Date(2000, 0, 1);
+  const [date, setDate] = useState<Date | undefined>(defaultDate ?? fallBackDate);
+
+  useEffect(() => {
+    if (defaultDate) {
+      setDate(defaultDate);
+    }
+  }, [defaultDate]);
 
   useEffect(() => {
     if (onDateChange) {
-      console.log("date change inside picker", date);
       onDateChange(date);
     }
   }, [date, onDateChange]);

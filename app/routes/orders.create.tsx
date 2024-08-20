@@ -1,9 +1,9 @@
 // app/routes/orders.create.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type ActionFunction, json } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
+import { useActionData, useNavigation, useSubmit } from "@remix-run/react";
 import { redirect } from "@remix-run/router";
-import React, { useTransition } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "~/components/ui/button";
@@ -44,23 +44,119 @@ export const action: ActionFunction = async ({ request }) => {
 
   const orderData = result.data;
   const drugName = orderData.drugName;
+
+  ///////////////////////////////////////////////////////////////////////
+  // NOTE: The following payload _should_ be all that is required according to the API documentaion.
+  // However, it is rejected by the API with a 403 error.
+  // The hardcoded payload below was provided by the LifeFile support team and is accepted by the API.
+  // I am still working to track down which fields are truly required.
+  ///////////////////////////////////////////////////////////////////////
+
+  // const finalOrderData = {
+  //   message: {
+  //     id: orderData.referenceId,
+  //   },
+  //   prescriber: {
+  //     npi: orderData.npi,
+  //     lastName: orderData.prescriberLastName,
+  //   },
+  //   patient: {
+  //     lastName: orderData.patientLastName,
+  //     firstName: orderData.patientFirstName,
+  //     dateOfBirth: orderData.dateOfBirth,
+  //     gender: orderData.gender,
+  //   },
+  //   rxs: [
+  //     {
+  //       drugName,
+  //     },
+  //   ],
+  // };
+
   const finalOrderData = {
     message: {
-      id: orderData.referenceId,
+      id: 9876543210,
+      sentTime: "2050-03-14 06:21:30",
     },
-    prescriber: {
-      npi: orderData.npi,
-      lastName: orderData.prescriberLastName,
+    order: {
+      general: {
+        memo: "REVP: TEST LF API ORDER. DO NOT USE.",
+      },
+      prescriber: {
+        npi: 99999999,
+        licenseState: "CA",
+        licenseNumber: 99999999,
+        dea: "GQ9999999",
+        lastName: "NODOCTOR",
+        firstName: "NODOCTOR",
+        middleName: "NODOCTOR",
+        address1: "123 NO ADDRESS 123",
+        address2: "Apt. 333",
+        city: "SAN DIEGO",
+        state: "CA",
+        zip: "92101",
+        phone: "(999) 999-9999",
+        fax: "(999) 999-9998",
+        email: "nodoctor@testlfrevp.com",
+      },
+      practice: {
+        id: 988599,
+      },
+      patient: {
+        lastName: "NOPATIENT",
+        firstName: "NOPATIENT",
+        middleName: "NOPATIENT",
+        gender: "m",
+        dateOfBirth: "2008-07-17",
+        address1: "456 NO ADDRESS DR",
+        address2: "Apt. 999",
+        address3: "Suite 2",
+        city: "SAN DIEGO",
+        state: "CA",
+        zip: "92101",
+        country: "US",
+        phoneHome: "(555) 555-5555",
+        phoneMobile: "(555) 555-5556",
+        phoneWork: "(555) 555-5557",
+        email: "nopatient@testlfrevp.com",
+      },
+      shipping: {
+        recipientType: "patient",
+        recipientLastName: "NOPATIENT",
+        recipientFirstName: "NOPATIENT",
+        recipientPhone: "(555) 555-5556",
+        recipientEmail: "nopatient@testlfrevp.com",
+        addressLine1: "456 NO ADDRESS DR",
+        addressLine2: "Apt. 999",
+        addressLine3: "Suite 2",
+        city: "SAN DIEGO",
+        state: "CA",
+        zipCode: "92101",
+        country: "US",
+        service: 9,
+      },
+      billing: {
+        payorType: "pat",
+      },
+      rxs: [
+        {
+          rxType: "new",
+          drugName: "NOPRODUCT",
+          drugStrength: "1 MG/ML",
+          drugForm: "CREAM",
+          lfProductID: 1,
+          externalPmsProductID: 1,
+          quantity: 1,
+          quantityUnits: "GM",
+          directions: "TEST NON-EXISTING PRODUCT FROM REVP. DO NOT USE.",
+          refills: 1,
+          dateWritten: "2023-05-01",
+          daysSupply: 1,
+        },
+      ],
     },
-    patient: {
-      lastName: orderData.patientLastName,
-      firstName: orderData.patientFirstName,
-      dateOfBirth: orderData.dateOfBirth,
-      gender: orderData.gender,
-    },
-    rxs: [{ drugName }],
   };
-  console.log("Final order data:", finalOrderData);
+  // console.log("!!!Final order data:", finalOrderData);
 
   // Post the order data to the external API
   try {
@@ -75,44 +171,67 @@ export const action: ActionFunction = async ({ request }) => {
       throw new Error("Failed to submit order to external API");
     }
 
-    return redirect("/orders/confirmation");
+    const responseData = await response.json();
+    console.log("Order create: Received response from external API:", responseData);
+    const orderId = responseData.data?.orderId;
+
+    return redirect(`/orders/confirmation?orderId=${orderId}`);
   } catch (error) {
     console.error("Error submitting order:", error);
     return json({ errors: { submit: "Failed to submit order" } }, { status: 500 });
   }
 };
 
+const genders = [
+  {
+    value: "m",
+    label: "Male",
+  },
+  {
+    value: "f",
+    label: "Female",
+  },
+  {
+    value: "a",
+    label: "Animal",
+  },
+  {
+    value: "u",
+    label: "Unknown",
+  },
+];
+
 export default function OrdersCreate() {
   const actionData = useActionData<ActionData>();
-  const [isPending] = useTransition();
+  const submit = useSubmit();
+  const navigation = useNavigation();
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
-    watch,
     control,
   } = useForm({
     resolver: zodResolver(orderSchema),
+    defaultValues: {
+      referenceId: "5551234",
+      npi: "1234567890",
+      prescriberLastName: "Jones",
+      patientLastName: "Smith",
+      patientFirstName: "Rachel",
+      dateOfBirth: "2002-04-05",
+      gender: "f",
+      drugName: "Sema",
+    },
   });
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const onSubmit = async (data: any) => {
     try {
-      const form = new FormData();
+      const formData = new FormData();
       for (const key in data) {
-        form.append(key, data[key]);
+        formData.append(key, data[key]);
       }
-      const response = await fetch("/orders/create", {
-        method: "POST",
-        body: form,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit order");
-      }
-
-      window.location.href = "/orders/confirmation";
+      submit(formData, { method: "post" });
     } catch (error) {
       console.error("Error submitting order:", error);
     }
@@ -174,18 +293,28 @@ export default function OrdersCreate() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Date of Birth*:</label>
-          <DatePicker
-            onDateChange={(date) => {
-              if (date) {
-                console.log("Date selected:", date);
-                console.log("Date ISO string:", date.toISOString().split("T")[0]);
-                setValue("dateOfBirth", date.toISOString().split("T")[0]);
-              }
+
+          <Controller
+            control={control}
+            name="dateOfBirth"
+            render={({ field }) => {
+              return (
+                <DatePicker
+                  defaultDate={!!field.value ? new Date(field.value) : undefined}
+                  onDateChange={(date) => {
+                    if (date) {
+                      field.onChange(date.toISOString().split("T")[0]);
+                    }
+                  }}
+                />
+              );
             }}
           />
-          {errors.dateOfBirth && typeof errors.dateOfBirth.message === "string" && (
-            <span className="text-red-600">{errors.dateOfBirth.message}</span>
-          )}
+          <div>
+            {errors.dateOfBirth && typeof errors.dateOfBirth.message === "string" && (
+              <span className="text-red-600">{errors.dateOfBirth.message}</span>
+            )}
+          </div>
         </div>
         <div>
           <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
@@ -196,15 +325,18 @@ export default function OrdersCreate() {
             name="gender"
             render={({ field }) => {
               return (
-                <Select onValueChange={(value) => field.onChange(value)}>
+                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Gender" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="m">Male</SelectItem>
-                    <SelectItem value="f">Female</SelectItem>
-                    <SelectItem value="a">Animal</SelectItem>
-                    <SelectItem value="u">Unknown</SelectItem>
+                    {genders.map((g) => {
+                      return (
+                        <SelectItem key={g.value} value={g.value}>
+                          {g.label}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               );
@@ -226,8 +358,8 @@ export default function OrdersCreate() {
 
         {actionData?.errors?.submit && <div className="text-red-600">{actionData.errors.submit}</div>}
 
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Submitting..." : "Submit Order"}
+        <Button type="submit" disabled={navigation.state === "submitting"}>
+          {navigation.state === "submitting" ? "Submitting..." : "Submit Order"}
         </Button>
       </form>
     </Card>
