@@ -11,6 +11,19 @@ import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { API_HEADERS, BASE_API_URL } from "~/data/shared.server";
 
+const shippingServices = [
+  { value: "9", label: "Pharmacy pickup" },
+  { value: "999", label: "Delivery" },
+  { value: "6223", label: "Fedex 2 Day" },
+  { value: "6224", label: "Fedex Express Saver" },
+  { value: "6225", label: "Fedex Ground" },
+  { value: "6226", label: "Fedex First Overnight" },
+  { value: "6227", label: "Fedex Ground Home Delivery" },
+  { value: "6228", label: "Fedex Priority Overnight" },
+  { value: "6230", label: "Fedex Standard Overnight" },
+  { value: "6231", label: "Fedex 2 Day AM" },
+];
+
 const updateOrderShippingSchema = z.object({
   orderId: z.string().min(1),
   recipientType: z.enum(["clinic", "patient"]),
@@ -23,12 +36,14 @@ const updateOrderShippingSchema = z.object({
   state: z.string().max(2),
   zipCode: z.string().max(10),
   country: z.string().max(2),
+  service: z.string().min(1),
 });
 
 interface ActionData {
   errors?: {
     submit?: string;
   };
+  success?: boolean;
 }
 
 export const action: ActionFunction = async ({ request }) => {
@@ -55,6 +70,7 @@ export const action: ActionFunction = async ({ request }) => {
       state: shippingFormData.state,
       zipCode: shippingFormData.zipCode,
       country: shippingFormData.country,
+      service: Number(shippingFormData.service),
     },
   };
   console.log("Received shipping data:", orderId, finalShippingInfo);
@@ -73,10 +89,10 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     const responseData = await response.json();
-    const returnedOrderId = responseData.data?.orderId;
+    console.log("Received response from external API:", responseData);
 
     // return redirect(`/orders/confirmation?orderId=${orderId}`);
-    return json({ orderId: returnedOrderId });
+    return json({ success: true });
   } catch (error) {
     console.error("Error updating shipping information:", error);
     return json({ errors: { submit: "Failed to update shipping info" } }, { status: 500 });
@@ -90,6 +106,7 @@ const recipientTypes = [
 
 export default function OrdersUpdateShipping() {
   const actionData = useActionData<ActionData>();
+  console.log("Action data:", actionData);
   const submit = useSubmit();
   const navigation = useNavigation();
   const form = useForm({
@@ -106,6 +123,7 @@ export default function OrdersUpdateShipping() {
       state: "NY",
       zipCode: "12345",
       country: "US",
+      service: shippingServices[0].value,
     },
   });
   const {
@@ -238,7 +256,40 @@ export default function OrdersUpdateShipping() {
           {errors.country && <span className="text-red-600">{errors.country.message}</span>}
         </div>
 
+        <div>
+          <label htmlFor="service" className="block text-sm font-medium text-gray-700">
+            Service:
+          </label>
+
+          <Controller
+            control={control}
+            name="service"
+            render={({ field }) => {
+              return (
+                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {shippingServices.map((g) => {
+                      return (
+                        <SelectItem key={g.value} value={g.value}>
+                          {g.label}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              );
+            }}
+          />
+
+          {errors.country && <span className="text-red-600">{errors.country.message}</span>}
+        </div>
+
         {actionData?.errors?.submit && <div className="text-red-600">{actionData.errors.submit}</div>}
+
+        {actionData?.success && <div className={"text-green-500"}>SUCCESS!</div>}
 
         <Button type="submit" disabled={navigation.state === "submitting"}>
           {navigation.state === "submitting" ? "Submitting..." : "Update Shipping"}

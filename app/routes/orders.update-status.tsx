@@ -1,7 +1,7 @@
+// app/routes/orders.update-status.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type ActionFunction, json } from "@remix-run/node";
 import { useActionData, useNavigation, useSubmit } from "@remix-run/react";
-// app/routes/orders.update-status.tsx
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,19 +13,19 @@ import { API_HEADERS, BASE_API_URL } from "~/data/shared.server";
 
 const updateOrderStatusSchema = z.object({
   orderId: z.string().min(1),
-  status: z.string(),
+  status: z.string().min(1, "Please select a status"),
 });
 
 interface ActionData {
   errors?: {
     submit?: string;
   };
+  success?: boolean;
 }
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
-  // console.log("Received data:", data);
 
   // Validate data against the schema
   const result = updateOrderStatusSchema.safeParse(data);
@@ -37,8 +37,6 @@ export const action: ActionFunction = async ({ request }) => {
   const orderData = result.data;
   const orderId = orderData.orderId;
   const status = orderData.status;
-
-  // console.log("!!!Final order data:", finalOrderData);
 
   // Post the status to the external API
   try {
@@ -56,8 +54,7 @@ export const action: ActionFunction = async ({ request }) => {
     const responseData = await response.json();
     console.log("Received response from external API:", responseData);
 
-    // return redirect(`/orders/confirmation?orderId=${orderId}`);
-    return null;
+    return json({ success: true });
   } catch (error) {
     console.error("Error updating order status:", error);
     return json({ errors: { submit: "Failed to update order status" } }, { status: 500 });
@@ -145,6 +142,7 @@ export default function OrdersUpdateStatus() {
           )}
         </div>
         {actionData?.errors?.submit && <div className="text-red-600">{actionData.errors.submit}</div>}
+        {actionData?.success && <div className={"text-green-500"}>SUCCESS!</div>}
 
         <Button type="submit" disabled={navigation.state === "submitting"}>
           {navigation.state === "submitting" ? "Submitting..." : "Update Status"}
