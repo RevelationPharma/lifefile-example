@@ -156,7 +156,6 @@ export const action: ActionFunction = async ({ request }) => {
       ],
     },
   };
-  // console.log("!!!Final order data:", finalOrderData);
 
   // Post the order data to the external API
   try {

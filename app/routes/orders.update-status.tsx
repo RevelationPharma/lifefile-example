@@ -3,11 +3,12 @@ import { type ActionFunction, json } from "@remix-run/node";
 import { useActionData, useNavigation, useSubmit } from "@remix-run/react";
 // app/routes/orders.update-status.tsx
 import React from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { API_HEADERS, BASE_API_URL } from "~/data/shared.server";
 
 const updateOrderStatusSchema = z.object({
@@ -63,6 +64,11 @@ export const action: ActionFunction = async ({ request }) => {
   }
 };
 
+const statusOptions = [
+  { value: "b8535", label: "11433 Sandbox Status A" },
+  { value: "beb0e", label: "11433 Sandbox Status B" },
+];
+
 export default function OrdersUpdateStatus() {
   const actionData = useActionData<ActionData>();
   const submit = useSubmit();
@@ -72,11 +78,12 @@ export default function OrdersUpdateStatus() {
     register,
     handleSubmit,
     formState: { errors },
+    control,
   } = useForm({
     resolver: zodResolver(updateOrderStatusSchema),
     defaultValues: {
-      orderId: "64757939",
-      status: "status-alpha",
+      orderId: "64809556",
+      status: "",
     },
   });
 
@@ -111,7 +118,28 @@ export default function OrdersUpdateStatus() {
           <label htmlFor="status" className="block text-sm font-medium text-gray-700">
             Status:
           </label>
-          <Input type="text" id="status" {...register("status")} placeholder="Status" />
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => {
+              return (
+                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((g) => {
+                      return (
+                        <SelectItem key={g.value} value={g.value}>
+                          {g.label}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              );
+            }}
+          />
           {errors.status && typeof errors.status.message === "string" && (
             <span className="text-red-600">{errors.status.message}</span>
           )}
