@@ -39,7 +39,7 @@
     "@vercel/postgres": "^0.8.0",
     "@vercel/remix": "^2.9.2",
     "auth0": "^4.4.0",
-    "axios": "^1.6.8",
+    "axios": "^1.7.4",
     "axios-retry": "^4.3.0",
     "basic-auth": "^2.0.1",
     "camelcase-keys": "^9.1.3",
