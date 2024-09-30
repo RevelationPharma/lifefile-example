@@ -3,3 +3,4 @@
 .cache
 public/build
 build
+.env
