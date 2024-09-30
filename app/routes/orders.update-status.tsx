@@ -8,7 +8,13 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { API_HEADERS, BASE_API_URL } from "~/data/shared.server";
 
 const updateOrderStatusSchema = z.object({
@@ -31,7 +37,10 @@ export const action: ActionFunction = async ({ request }) => {
   const result = updateOrderStatusSchema.safeParse(data);
   if (!result.success) {
     console.log("Validation errors:", result.error.flatten().fieldErrors); // Log validation errors
-    return json({ errors: result.error.flatten().fieldErrors }, { status: 400 });
+    return json(
+      { errors: result.error.flatten().fieldErrors },
+      { status: 400 }
+    );
   }
 
   const orderData = result.data;
@@ -47,7 +56,11 @@ export const action: ActionFunction = async ({ request }) => {
     });
 
     if (!response.ok) {
-      console.log("Failed to submit order to external API:", response.status, response.statusText);
+      console.log(
+        "Failed to submit order to external API:",
+        response.status,
+        response.statusText
+      );
       throw new Error("Failed to submit order to external API");
     }
 
@@ -57,7 +70,10 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ success: true });
   } catch (error) {
     console.error("Error updating order status:", error);
-    return json({ errors: { submit: "Failed to update order status" } }, { status: 500 });
+    return json(
+      { errors: { submit: "Failed to update order status" } },
+      { status: 500 }
+    );
   }
 };
 
@@ -98,8 +114,14 @@ export default function OrdersUpdateStatus() {
   };
 
   return (
-    <Card className={"m-auto max-w-lg p-4"}>
-      <h1 className={"text-neutral-600 dark:text-neutral-200 font-bold text-sm mb-4"}>Update Order Status</h1>
+    <Card className={"m-auto max-w-lg p-4 w-[300px]"}>
+      <h1
+        className={
+          "text-neutral-600 dark:text-neutral-200 font-bold text-sm mb-4"
+        }
+      >
+        Update Order Status
+      </h1>
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div>
@@ -120,7 +142,10 @@ export default function OrdersUpdateStatus() {
             name="status"
             render={({ field }) => {
               return (
-                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)}>
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={(value) => field.onChange(value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Status" />
                   </SelectTrigger>
@@ -141,11 +166,17 @@ export default function OrdersUpdateStatus() {
             <span className="text-red-600">{errors.status.message}</span>
           )}
         </div>
-        {actionData?.errors?.submit && <div className="text-red-600">{actionData.errors.submit}</div>}
-        {actionData?.success && <div className={"text-green-500"}>SUCCESS!</div>}
+        {actionData?.errors?.submit && (
+          <div className="text-red-600">{actionData.errors.submit}</div>
+        )}
+        {actionData?.success && (
+          <div className={"text-green-500"}>SUCCESS!</div>
+        )}
 
         <Button type="submit" disabled={navigation.state === "submitting"}>
-          {navigation.state === "submitting" ? "Submitting..." : "Update Status"}
+          {navigation.state === "submitting"
+            ? "Submitting..."
+            : "Update Status"}
         </Button>
       </form>
     </Card>
